@@ -27,7 +27,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npx ng build --base-href /simple-spotify-hero-app/
+      - run: npm run build -- --configuration production --base-href /simple-spotify-hero-app/
 
       - uses: actions/upload-pages-artifact@v3
         with:
