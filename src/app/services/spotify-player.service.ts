@@ -16,6 +16,7 @@ declare global {
 export class SpotifyPlayerService {
   private player: Spotify.Player | null = null;
   private positionTimer: ReturnType<typeof setInterval> | null = null;
+  private wasPlaying = false;
 
   deviceId: string = '';
 
@@ -142,6 +143,19 @@ export class SpotifyPlayerService {
     if (spotifyTrack.id && spotifyTrack.id !== prevTrackId) {
       this.checkFavoriteStatus(spotifyTrack.id);
     }
+
+    // Auto-advance: detect when playback ended (was playing, now paused, no next tracks)
+    if (
+      state.paused &&
+      this.wasPlaying &&
+      state.track_window.next_tracks.length === 0 &&
+      (state.position === 0 || state.position >= state.duration - 500)
+    ) {
+      this.wasPlaying = false;
+      this.nextTrack();
+    } else {
+      this.wasPlaying = !state.paused;
+    }
   }
 
   private startPositionPolling(): void {
@@ -167,7 +181,7 @@ export class SpotifyPlayerService {
   }
 
   private checkFavoriteStatus(trackId: string): void {
-    this.spotifyApi.checkSavedTracks([trackId]).subscribe({
+    this.spotifyApi.checkLibraryContains([trackId]).subscribe({
       next: (result: boolean[]) => {
         this.isFavorited$.next(result[0] ?? false);
       },
@@ -196,14 +210,14 @@ export class SpotifyPlayerService {
   }
 
   nextTrack(): void {
-    if (this.player) {
-      this.player.nextTrack();
+    if (this.deviceId) {
+      this.spotifyApi.next(this.deviceId).subscribe();
     }
   }
 
   previousTrack(): void {
-    if (this.player) {
-      this.player.previousTrack();
+    if (this.deviceId) {
+      this.spotifyApi.previous(this.deviceId).subscribe();
     }
   }
 
@@ -241,8 +255,8 @@ export class SpotifyPlayerService {
     }
     const isSaved: boolean = this.isFavorited$.value;
     const obs = isSaved
-      ? this.spotifyApi.removeTracks([track.id])
-      : this.spotifyApi.saveTracks([track.id]);
+      ? this.spotifyApi.removeFromLibrary([track.id])
+      : this.spotifyApi.saveToLibrary([track.id]);
     obs.subscribe({
       next: () => {
         this.isFavorited$.next(!isSaved);

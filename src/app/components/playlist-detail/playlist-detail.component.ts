@@ -18,6 +18,7 @@ export class PlaylistDetailComponent implements OnInit, OnDestroy {
 
   tracks: SpotifyTrack[] = [];
   isLoading = false;
+  currentTrackUri = '';
 
   private subscriptions: Subscription[] = [];
 
@@ -29,10 +30,13 @@ export class PlaylistDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscriptions.push(
       this.playlistService.currentPlaylistTracks$.subscribe((items: SpotifyPlaylistTrack[]) => {
-        this.tracks = items.map((item: SpotifyPlaylistTrack) => item.track);
+        this.tracks = items.map((entry: SpotifyPlaylistTrack) => entry.item);
       }),
       this.playlistService.isLoading$.subscribe((loading: boolean) => {
         this.isLoading = loading;
+      }),
+      this.playerService.currentTrack$.subscribe((track: SpotifyTrack | null) => {
+        this.currentTrackUri = track?.uri ?? '';
       }),
     );
     this.playlistService.loadPlaylistTracks(this.playlist().id);
@@ -40,6 +44,13 @@ export class PlaylistDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach((s: Subscription) => s.unsubscribe());
+  }
+
+  get trackCount(): number {
+    if (!this.isLoading && this.tracks.length > 0) {
+      return this.tracks.length;
+    }
+    return this.playlist().items?.total ?? 0;
   }
 
   goBack(): void {

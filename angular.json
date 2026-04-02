@@ -53,6 +53,9 @@
             ],
             "styles": [
               "src/styles.scss"
+            ],
+            "scripts": [
+              "node_modules/@okdoc-ai/plugin-sdk/dist/okdoc-iframe-sdk.js"
             ]
           },
           "configurations": {
@@ -86,6 +89,9 @@
           "defaultConfiguration": "production"
         },
         "serve": {
+          "options": {
+            "allowedHosts": ["justine-superb-oliver.ngrok-free.dev"]
+          },
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {

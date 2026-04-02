@@ -24,7 +24,7 @@ export class SpotifySearchService {
     this.isSearching$.next(true);
     this.spotifyApi.search(query, 'track').subscribe({
       next: (result) => {
-        const tracks: SpotifyTrack[] = result.tracks?.items ?? [];
+        const tracks: SpotifyTrack[] = (result.tracks?.items ?? []).filter((t): t is SpotifyTrack => t != null);
         this.trackResults$.next(tracks);
         this.isSearching$.next(false);
       },
@@ -43,7 +43,7 @@ export class SpotifySearchService {
     this.isSearching$.next(true);
     this.spotifyApi.search(query, 'playlist').subscribe({
       next: (result) => {
-        const playlists: SpotifyPlaylist[] = result.playlists?.items ?? [];
+        const playlists: SpotifyPlaylist[] = (result.playlists?.items ?? []).filter((p): p is SpotifyPlaylist => p != null && p.id != null);
         this.playlistResults$.next(playlists);
         this.isSearching$.next(false);
       },
@@ -68,7 +68,7 @@ export class SpotifySearchService {
       id: p.id,
       name: p.name,
       owner: p.owner.display_name,
-      trackCount: p.tracks.total,
+      trackCount: p.items?.total ?? 0,
     }));
   }
 }

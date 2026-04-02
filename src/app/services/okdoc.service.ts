@@ -211,6 +211,30 @@ export class OkDocService {
       },
     });
 
+    OkDoc.registerTool('volume_up', {
+      description: 'Increase the playback volume by 10%.',
+      handler: async () => {
+        const current: number = this.playerService.volume$.value;
+        const newVol: number = Math.min(100, current + 10);
+        this.ngZone.run(() => {
+          this.playerService.setVolume(newVol);
+        });
+        return { content: [{ type: 'text', text: `Volume increased to ${newVol}%.` }] };
+      },
+    });
+
+    OkDoc.registerTool('volume_down', {
+      description: 'Decrease the playback volume by 10%.',
+      handler: async () => {
+        const current: number = this.playerService.volume$.value;
+        const newVol: number = Math.max(0, current - 10);
+        this.ngZone.run(() => {
+          this.playerService.setVolume(newVol);
+        });
+        return { content: [{ type: 'text', text: `Volume decreased to ${newVol}%.` }] };
+      },
+    });
+
     OkDoc.registerTool('toggle_favorite', {
       description: 'Save or remove the current track from your library.',
       handler: async () => {

@@ -8,6 +8,22 @@
   cursor: pointer;
 }
 
+.mini-progress-bar {
+  height: 2px;
+  background: #535353;
+  width: 100%;
+}
+
+.mini-progress-fill {
+  height: 100%;
+  background: #1DB954;
+  transition: width 0.3s linear;
+}
+
+.mini-content {
+  display: flex;
+}
+
 .mini-album-art {
   width: 44px;
   height: 44px;
@@ -20,7 +36,6 @@
 }
 
 .mini-player ion-button {
-  --color: #ffffff;
   min-width: 44px;
   min-height: 44px;
 }
@@ -103,13 +118,11 @@
 
 /* Controls */
 .controls ion-button {
-  --color: #ffffff;
   min-width: 44px;
   min-height: 44px;
 }
 
 .play-pause-btn {
-  --background: #ffffff;
   --color: #000000;
   --padding-start: 16px;
   --padding-end: 16px;

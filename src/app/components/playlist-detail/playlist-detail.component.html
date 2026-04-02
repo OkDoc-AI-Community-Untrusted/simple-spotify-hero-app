@@ -9,7 +9,7 @@
 
   <div class="header-info ut-flex-1">
     <h2 class="header-title ut-ellipsis">{{ playlist().name }}</h2>
-    <p class="app-muted-text ut-text-sm">{{ playlist().tracks.total }} tracks</p>
+    <p class="app-muted-text ut-text-sm">{{ trackCount }} tracks</p>
   </div>
 
   <ion-button fill="solid" color="primary" shape="round" size="small" (click)="playAll()">
@@ -27,7 +27,7 @@
 @if (!isLoading && tracks.length > 0) {
   <ion-list lines="none" class="track-list">
     @for (track of tracks; track track.id; let i = $index) {
-      <ion-item button (click)="playTrack(track)" class="track-item">
+      <ion-item button (click)="playTrack(track)" class="track-item" [class.now-playing]="track.uri === currentTrackUri">
         <span class="track-index app-muted-text" slot="start">{{ i + 1 }}</span>
         @if (getAlbumImage(track)) {
           <ion-thumbnail slot="start">

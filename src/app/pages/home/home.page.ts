@@ -73,6 +73,10 @@ export class HomePage implements OnInit, OnDestroy {
     this.selectedPlaylist = null;
   }
 
+  refresh(): void {
+    this.playlistService.loadMyPlaylists();
+  }
+
   logout(): void {
     this.playerService.destroy();
     this.authService.logout();

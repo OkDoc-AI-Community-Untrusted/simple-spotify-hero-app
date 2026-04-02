@@ -79,6 +79,10 @@ export class PlayerComponent implements OnInit, OnDestroy {
     return this.formatTime(this.durationMs);
   }
 
+  get progressPercent(): number {
+    return this.durationMs > 0 ? (this.positionMs / this.durationMs) * 100 : 0;
+  }
+
   toggleExpand(): void {
     this.isExpanded = !this.isExpanded;
   }

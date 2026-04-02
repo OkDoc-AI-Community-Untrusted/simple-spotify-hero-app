@@ -62,3 +62,15 @@
   color: #535353;
   margin-bottom: 8px;
 }
+
+.track-item.now-playing {
+  --background: rgba(29, 185, 84, 0.1);
+
+  .track-index {
+    color: #1DB954;
+  }
+
+  h3 {
+    color: #1DB954;
+  }
+}

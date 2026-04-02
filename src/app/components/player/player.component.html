@@ -1,20 +1,24 @@
 <!-- Mini Player Bar -->
 @if (!isExpanded) {
-  <div class="mini-player app-now-playing-bar ut-flex ut-align-center ut-gap-8 ut-p-8"
-       (click)="toggleExpand()">
-    @if (albumImageUrl) {
-      <img [src]="albumImageUrl" alt="Album art" class="mini-album-art app-track-image">
-    }
-    <div class="mini-info ut-flex-1 ut-ellipsis">
-      <div class="mini-track-name ut-ellipsis">{{ currentTrack?.name }}</div>
-      <div class="mini-artist app-muted-text ut-text-xs ut-ellipsis">{{ artistNames }}</div>
+  <div class="mini-player app-now-playing-bar" (click)="toggleExpand()">
+    <div class="mini-progress-bar">
+      <div class="mini-progress-fill" [style.width.%]="progressPercent"></div>
     </div>
-    <ion-button fill="clear" size="small" (click)="togglePlay(); $event.stopPropagation()">
-      <ion-icon [name]="isPlaying ? 'pause' : 'play'" slot="icon-only"></ion-icon>
-    </ion-button>
-    <ion-button fill="clear" size="small" (click)="nextTrack(); $event.stopPropagation()">
-      <ion-icon name="play-skip-forward" slot="icon-only"></ion-icon>
-    </ion-button>
+    <div class="mini-content ut-flex ut-align-center ut-gap-8 ut-p-8">
+      @if (albumImageUrl) {
+        <img [src]="albumImageUrl" alt="Album art" class="mini-album-art app-track-image">
+      }
+      <div class="mini-info ut-flex-1 ut-ellipsis">
+        <div class="mini-track-name ut-ellipsis">{{ currentTrack?.name }}</div>
+        <div class="mini-artist app-muted-text ut-text-xs ut-ellipsis">{{ artistNames }}</div>
+      </div>
+      <ion-button fill="clear" size="small" (click)="togglePlay(); $event.stopPropagation()">
+        <ion-icon [name]="isPlaying ? 'pause' : 'play'" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button fill="clear" size="small" (click)="nextTrack(); $event.stopPropagation()">
+        <ion-icon name="play-skip-forward" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
   </div>
 }
 

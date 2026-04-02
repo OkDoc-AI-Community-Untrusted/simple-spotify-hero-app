@@ -41,3 +41,11 @@
     margin-bottom: 8px;
   }
 }
+
+.result-item.now-playing {
+  --background: rgba(29, 185, 84, 0.1);
+
+  h3 {
+    color: #1DB954;
+  }
+}

@@ -37,14 +37,14 @@ export interface SpotifyPlaylist {
     id: string;
     display_name: string;
   };
-  tracks: {
+  items?: {
     total: number;
     href: string;
   };
 }
 
 export interface SpotifyPlaylistTrack {
-  track: SpotifyTrack;
+  item: SpotifyTrack;
   added_at: string;
 }
 

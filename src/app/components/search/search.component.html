@@ -26,7 +26,7 @@
   @if (searchTab === 'tracks' && trackResults.length > 0) {
     <ion-list lines="none" class="results-list">
       @for (track of trackResults; track track.id) {
-        <ion-item button (click)="playTrack(track)" class="result-item">
+        <ion-item button (click)="playTrack(track)" class="result-item" [class.now-playing]="track.uri === currentTrackUri">
           @if (getAlbumImage(track)) {
             <ion-thumbnail slot="start">
               <img [src]="getAlbumImage(track)" [alt]="track.name">
@@ -56,7 +56,7 @@
           <ion-label>
             <h3 class="ut-ellipsis">{{ playlist.name }}</h3>
             <p class="app-muted-text ut-ellipsis">
-              {{ playlist.tracks.total }} tracks · {{ playlist.owner.display_name }}
+              {{ playlist.items?.total ?? 0 }} tracks · {{ playlist.owner.display_name }}
             </p>
           </ion-label>
         </ion-item>

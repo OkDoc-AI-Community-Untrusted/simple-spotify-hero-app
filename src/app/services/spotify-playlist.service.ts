@@ -28,9 +28,13 @@ export class SpotifyPlaylistService {
   loadPlaylistTracks(playlistId: string): void {
     this.isLoading$.next(true);
     this.currentPlaylistTracks$.next([]);
-    this.spotifyApi.getPlaylistTracks(playlistId).subscribe({
+    this.spotifyApi.getPlaylistItems(playlistId).subscribe({
       next: (result) => {
-        this.currentPlaylistTracks$.next(result.items);
+        // Filter out null/unavailable items from the API response
+        const items: SpotifyPlaylistTrack[] = (result.items as (SpotifyPlaylistTrack | null)[]).filter(
+          (entry): entry is SpotifyPlaylistTrack => entry != null && entry.item != null
+        );
+        this.currentPlaylistTracks$.next(items);
         this.isLoading$.next(false);
       },
       error: () => {
@@ -45,7 +49,7 @@ export class SpotifyPlaylistService {
       id: p.id,
       name: p.name,
       owner: p.owner.display_name,
-      trackCount: p.tracks.total,
+      trackCount: p.items?.total ?? 0,
     }));
   }
 }

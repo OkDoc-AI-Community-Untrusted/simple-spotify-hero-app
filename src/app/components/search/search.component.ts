@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, filter, tap } from 'rxjs';
@@ -14,10 +14,13 @@ import { SEARCH_DEBOUNCE_MS } from '../../models/constants';
   styleUrls: ['./search.component.scss'],
 })
 export class SearchComponent implements OnInit, OnDestroy {
+  playlistSelected = output<SpotifyPlaylist>();
+
   trackResults: SpotifyTrack[] = [];
   playlistResults: SpotifyPlaylist[] = [];
   isSearching = false;
   searchTab: 'tracks' | 'playlists' = 'tracks';
+  currentTrackUri = '';
 
   private searchSubject = new Subject<string>();
   private subscriptions: Subscription[] = [];
@@ -37,6 +40,9 @@ export class SearchComponent implements OnInit, OnDestroy {
       }),
       this.searchService.isSearching$.subscribe((searching: boolean) => {
         this.isSearching = searching;
+      }),
+      this.playerService.currentTrack$.subscribe((track: SpotifyTrack | null) => {
+        this.currentTrackUri = track?.uri ?? '';
       }),
       this.searchSubject.pipe(
         debounceTime(SEARCH_DEBOUNCE_MS),
@@ -67,11 +73,12 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   playTrack(track: SpotifyTrack): void {
-    this.playerService.playTrackUri(track.uri);
+    // Play in album context so next/previous navigates the album naturally
+    this.playerService.playContextUri(track.album.uri, track.uri);
   }
 
   playPlaylist(playlist: SpotifyPlaylist): void {
-    this.playerService.playContextUri(playlist.uri);
+    this.playlistSelected.emit(playlist);
   }
 
   getAlbumImage(track: SpotifyTrack): string {
