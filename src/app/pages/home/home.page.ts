@@ -14,7 +14,6 @@ import { SpotifyPlaylist, SpotifyTrack } from '../../models/spotify.interface';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
   imports: [
     IonicModule,
     CommonModule,

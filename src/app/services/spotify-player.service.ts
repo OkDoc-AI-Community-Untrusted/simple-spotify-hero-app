@@ -28,6 +28,8 @@ export class SpotifyPlayerService {
   readonly shuffle$ = new BehaviorSubject<boolean>(false);
   readonly isFavorited$ = new BehaviorSubject<boolean>(false);
   readonly isReady$ = new BehaviorSubject<boolean>(false);
+  readonly currentContextUri$ = new BehaviorSubject<string>('');
+  readonly nowPlayingList$ = new BehaviorSubject<SpotifyTrack[]>([]);
 
   constructor(
     private spotifyApi: SpotifyApiService,
@@ -132,6 +134,7 @@ export class SpotifyPlayerService {
     this.positionMs$.next(state.position);
     this.durationMs$.next(state.duration);
     this.shuffle$.next(state.shuffle);
+    this.currentContextUri$.next(state.context?.uri ?? '');
 
     if (!state.paused) {
       this.startPositionPolling();
@@ -262,6 +265,10 @@ export class SpotifyPlayerService {
         this.isFavorited$.next(!isSaved);
       },
     });
+  }
+
+  setNowPlayingList(tracks: SpotifyTrack[]): void {
+    this.nowPlayingList$.next(tracks);
   }
 
   playTrackUri(uri: string): void {

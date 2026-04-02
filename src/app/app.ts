@@ -3,7 +3,6 @@ import { IonicModule } from '@ionic/angular';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [IonicModule],
   template: `
     <ion-app>

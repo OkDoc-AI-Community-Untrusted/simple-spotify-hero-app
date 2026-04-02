@@ -5,7 +5,6 @@ import { SpotifyAuthService } from '../../services/spotify-auth.service';
 
 @Component({
   selector: 'app-callback',
-  standalone: true,
   imports: [IonicModule],
   template: `
     <ion-content class="ion-padding ut-flex-center">

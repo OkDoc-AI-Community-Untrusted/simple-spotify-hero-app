@@ -25,24 +25,11 @@
 }
 
 @if (!isLoading && tracks.length > 0) {
-  <ion-list lines="none" class="track-list">
-    @for (track of tracks; track track.id; let i = $index) {
-      <ion-item button (click)="playTrack(track)" class="track-item" [class.now-playing]="track.uri === currentTrackUri">
-        <span class="track-index app-muted-text" slot="start">{{ i + 1 }}</span>
-        @if (getAlbumImage(track)) {
-          <ion-thumbnail slot="start">
-            <img [src]="getAlbumImage(track)" [alt]="track.name">
-          </ion-thumbnail>
-        }
-        <ion-label>
-          <h3 class="ut-ellipsis">{{ track.name }}</h3>
-          <p class="app-muted-text ut-ellipsis">
-            {{ track.artists[0]?.name }} · {{ formatDuration(track.duration_ms) }}
-          </p>
-        </ion-label>
-      </ion-item>
-    }
-  </ion-list>
+  <app-track-list
+    [tracks]="tracks"
+    [currentTrackUri]="currentTrackUri"
+    (trackClicked)="playTrack($event)">
+  </app-track-list>
 }
 
 @if (!isLoading && tracks.length === 0) {

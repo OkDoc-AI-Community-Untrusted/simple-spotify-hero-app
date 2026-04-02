@@ -73,7 +73,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   playTrack(track: SpotifyTrack): void {
-    // Play in album context so next/previous navigates the album naturally
+    this.playerService.setNowPlayingList(this.trackResults);
     this.playerService.playContextUri(track.album.uri, track.uri);
   }
 

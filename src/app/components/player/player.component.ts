@@ -4,11 +4,11 @@ import { IonicModule } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
 import { SpotifyTrack } from '../../models/spotify.interface';
+import { TrackListComponent } from '../track-list/track-list.component';
 
 @Component({
   selector: 'app-player',
-  standalone: true,
-  imports: [IonicModule, CommonModule],
+  imports: [IonicModule, CommonModule, TrackListComponent],
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss'],
 })
@@ -21,6 +21,9 @@ export class PlayerComponent implements OnInit, OnDestroy {
   shuffle = false;
   isFavorited = false;
   isExpanded = false;
+  showQueue = false;
+  nowPlayingTracks: SpotifyTrack[] = [];
+  currentContextUri = '';
 
   private subscriptions: Subscription[] = [];
 
@@ -48,6 +51,12 @@ export class PlayerComponent implements OnInit, OnDestroy {
       }),
       this.playerService.isFavorited$.subscribe((fav: boolean) => {
         this.isFavorited = fav;
+      }),
+      this.playerService.currentContextUri$.subscribe((uri: string) => {
+        this.currentContextUri = uri;
+      }),
+      this.playerService.nowPlayingList$.subscribe((tracks: SpotifyTrack[]) => {
+        this.nowPlayingTracks = tracks;
       }),
     );
   }
@@ -83,8 +92,36 @@ export class PlayerComponent implements OnInit, OnDestroy {
     return this.durationMs > 0 ? (this.positionMs / this.durationMs) * 100 : 0;
   }
 
+  get hasNowPlayingList(): boolean {
+    return this.nowPlayingTracks.length > 0;
+  }
+
+  get toggleQueueIcon(): string {
+    return this.showQueue ? 'musical-notes-outline' : 'list-outline';
+  }
+
   toggleExpand(): void {
     this.isExpanded = !this.isExpanded;
+    if (!this.isExpanded) {
+      this.showQueue = false;
+    }
+  }
+
+  expandToQueue(): void {
+    this.isExpanded = true;
+    this.showQueue = true;
+  }
+
+  toggleQueue(): void {
+    this.showQueue = !this.showQueue;
+  }
+
+  onQueueTrackClicked(track: SpotifyTrack): void {
+    if (this.currentContextUri) {
+      this.playerService.playContextUri(this.currentContextUri, track.uri);
+    } else {
+      this.playerService.playTrackUri(track.uri);
+    }
   }
 
   togglePlay(): void {

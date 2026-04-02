@@ -142,3 +142,27 @@
 .favorited {
   color: #1DB954;
 }
+
+/* Queue View */
+.queue-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.queue-now-playing {
+  background: rgba(29, 185, 84, 0.08);
+  border-bottom: 1px solid #282828;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.queue-mini-art {
+  width: 40px;
+  height: 40px;
+}
+
+.queue-now-playing ion-button {
+  min-width: 44px;
+  min-height: 44px;
+}

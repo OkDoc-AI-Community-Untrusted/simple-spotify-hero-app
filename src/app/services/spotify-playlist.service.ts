@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SpotifyApiService } from '../apis/spotify.api.service';
-import { SpotifyPlaylist, SpotifyPlaylistTrack } from '../models/spotify.interface';
+import { SpotifyPlaylist, SpotifyPlaylistTrack, SpotifyTrack } from '../models/spotify.interface';
 
 @Injectable({ providedIn: 'root' })
 export class SpotifyPlaylistService {
   readonly playlists$ = new BehaviorSubject<SpotifyPlaylist[]>([]);
-  readonly currentPlaylistTracks$ = new BehaviorSubject<SpotifyPlaylistTrack[]>([]);
+  readonly currentPlaylistTracks$ = new BehaviorSubject<SpotifyTrack[]>([]);
   readonly isLoading$ = new BehaviorSubject<boolean>(false);
 
   constructor(private spotifyApi: SpotifyApiService) {}
@@ -30,11 +30,10 @@ export class SpotifyPlaylistService {
     this.currentPlaylistTracks$.next([]);
     this.spotifyApi.getPlaylistItems(playlistId).subscribe({
       next: (result) => {
-        // Filter out null/unavailable items from the API response
-        const items: SpotifyPlaylistTrack[] = (result.items as (SpotifyPlaylistTrack | null)[]).filter(
-          (entry): entry is SpotifyPlaylistTrack => entry != null && entry.item != null
-        );
-        this.currentPlaylistTracks$.next(items);
+        const tracks: SpotifyTrack[] = (result.items as (SpotifyPlaylistTrack | null)[])
+          .filter((entry): entry is SpotifyPlaylistTrack => entry != null && entry.item != null)
+          .map((entry: SpotifyPlaylistTrack) => entry.item);
+        this.currentPlaylistTracks$.next(tracks);
         this.isLoading$.next(false);
       },
       error: () => {
