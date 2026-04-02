@@ -1,0 +1,95 @@
+<!-- Mini Player Bar -->
+@if (!isExpanded) {
+  <div class="mini-player app-now-playing-bar ut-flex ut-align-center ut-gap-8 ut-p-8"
+       (click)="toggleExpand()">
+    @if (albumImageUrl) {
+      <img [src]="albumImageUrl" alt="Album art" class="mini-album-art app-track-image">
+    }
+    <div class="mini-info ut-flex-1 ut-ellipsis">
+      <div class="mini-track-name ut-ellipsis">{{ currentTrack?.name }}</div>
+      <div class="mini-artist app-muted-text ut-text-xs ut-ellipsis">{{ artistNames }}</div>
+    </div>
+    <ion-button fill="clear" size="small" (click)="togglePlay(); $event.stopPropagation()">
+      <ion-icon [name]="isPlaying ? 'pause' : 'play'" slot="icon-only"></ion-icon>
+    </ion-button>
+    <ion-button fill="clear" size="small" (click)="nextTrack(); $event.stopPropagation()">
+      <ion-icon name="play-skip-forward" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
+}
+
+<!-- Expanded Player -->
+@if (isExpanded) {
+  <div class="expanded-player">
+    <div class="expanded-header ut-flex ut-align-center ut-px-16 ut-py-8">
+      <ion-button fill="clear" size="small" (click)="toggleExpand()">
+        <ion-icon name="chevron-down-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <span class="ut-flex-1 ion-text-center app-muted-text ut-text-sm">Now Playing</span>
+      <ion-button fill="clear" size="small" (click)="toggleFavorite()">
+        <ion-icon [name]="isFavorited ? 'heart' : 'heart-outline'" slot="icon-only"
+                  [class.favorited]="isFavorited"></ion-icon>
+      </ion-button>
+    </div>
+
+    <div class="expanded-content ut-flex-col ut-align-center ut-gap-16 ut-px-16">
+      @if (albumImageUrl) {
+        <img [src]="albumImageUrl" alt="Album art" class="expanded-album-art app-track-image">
+      }
+
+      <div class="track-info ut-w-100 ion-text-center">
+        <h2 class="track-name ut-ellipsis">{{ currentTrack?.name }}</h2>
+        <p class="track-artist app-muted-text ut-ellipsis">{{ artistNames }}</p>
+      </div>
+
+      <!-- Seek Slider -->
+      <div class="seek-container ut-w-100">
+        <ion-range
+          [min]="0"
+          [max]="durationMs"
+          [value]="positionMs"
+          (ionChange)="onSeekChange($any($event))"
+          class="seek-range"
+          aria-label="Seek">
+        </ion-range>
+        <div class="time-labels ut-flex ut-flex-between">
+          <span class="app-muted-text ut-text-xs">{{ positionFormatted }}</span>
+          <span class="app-muted-text ut-text-xs">{{ durationFormatted }}</span>
+        </div>
+      </div>
+
+      <!-- Playback Controls -->
+      <div class="controls ut-flex ut-align-center ut-justify-center ut-gap-8">
+        <ion-button fill="clear" (click)="toggleShuffle()" [class.active-control]="shuffle">
+          <ion-icon name="shuffle-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" class="control-btn" (click)="previousTrack()">
+          <ion-icon name="play-skip-back" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="solid" class="play-pause-btn" (click)="togglePlay()" shape="round">
+          <ion-icon [name]="isPlaying ? 'pause' : 'play'" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" class="control-btn" (click)="nextTrack()">
+          <ion-icon name="play-skip-forward" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button fill="clear" (click)="toggleFavorite()" [class.active-control]="isFavorited">
+          <ion-icon [name]="isFavorited ? 'heart' : 'heart-outline'" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+
+      <!-- Volume Control -->
+      <div class="volume-container ut-flex ut-align-center ut-gap-8 ut-w-100">
+        <ion-icon name="volume-low-outline" class="app-muted-text"></ion-icon>
+        <ion-range
+          [min]="0"
+          [max]="100"
+          [value]="volume"
+          (ionChange)="onVolumeChange($any($event))"
+          class="volume-range ut-flex-1"
+          aria-label="Volume">
+        </ion-range>
+        <ion-icon name="volume-high-outline" class="app-muted-text"></ion-icon>
+      </div>
+    </div>
+  </div>
+}

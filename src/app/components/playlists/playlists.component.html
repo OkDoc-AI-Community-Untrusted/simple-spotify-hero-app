@@ -1,0 +1,35 @@
+@if (isLoading) {
+  <div class="ut-flex ut-justify-center ut-p-16">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+}
+
+@if (!isLoading && playlists.length === 0) {
+  <div class="empty-state ut-flex-col ut-align-center ut-p-32">
+    <ion-icon name="musical-notes-outline" class="empty-icon"></ion-icon>
+    <p class="app-muted-text">No playlists found</p>
+  </div>
+}
+
+@if (playlists.length > 0) {
+  <ion-list lines="none" class="playlist-list">
+    @for (playlist of playlists; track playlist.id) {
+      <ion-item button (click)="selectPlaylist(playlist)" class="playlist-item">
+        @if (getPlaylistImage(playlist)) {
+          <ion-thumbnail slot="start">
+            <img [src]="getPlaylistImage(playlist)" [alt]="playlist.name">
+          </ion-thumbnail>
+        } @else {
+          <ion-thumbnail slot="start" class="placeholder-thumb">
+            <ion-icon name="musical-notes" class="placeholder-icon"></ion-icon>
+          </ion-thumbnail>
+        }
+        <ion-label>
+          <h3 class="ut-ellipsis">{{ playlist.name }}</h3>
+          <p class="app-muted-text ut-ellipsis">{{ playlist.tracks.total }} tracks</p>
+        </ion-label>
+        <ion-icon name="chevron-forward-outline" slot="end" class="app-muted-text"></ion-icon>
+      </ion-item>
+    }
+  </ion-list>
+}

@@ -1,0 +1,46 @@
+.playlist-list {
+  background: transparent;
+}
+
+.playlist-item {
+  --background: transparent;
+  --color: #ffffff;
+  --padding-start: 12px;
+  --inner-padding-end: 12px;
+  --min-height: 64px;
+
+  ion-thumbnail {
+    --size: 56px;
+    --border-radius: 4px;
+    margin-inline-end: 12px;
+  }
+
+  h3 {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  p {
+    font-size: 0.85rem;
+  }
+}
+
+.placeholder-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #282828;
+  border-radius: 4px;
+}
+
+.placeholder-icon {
+  font-size: 24px;
+  color: #535353;
+}
+
+.empty-state .empty-icon {
+  font-size: 48px;
+  color: #535353;
+  margin-bottom: 8px;
+}

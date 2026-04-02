@@ -1,0 +1,35 @@
+<ion-content class="login-content">
+  <div class="login-container ut-flex-col ut-flex-center ut-gap-16">
+    <div class="login-logo ut-flex-col ut-align-center ut-gap-12">
+      <ion-icon name="musical-notes-outline" class="logo-icon"></ion-icon>
+      <h1 class="login-title">Simple Spotify</h1>
+      <h2 class="login-subtitle">Hero App</h2>
+      <p class="app-muted-text ion-text-center">
+        Connect your Spotify Premium account to start listening.
+      </p>
+    </div>
+
+    @if (errorMessage) {
+      <ion-text color="danger">
+        <p class="ion-text-center">{{ errorMessage }}</p>
+      </ion-text>
+    }
+
+    <ion-button
+      expand="block"
+      class="login-button"
+      (click)="login()"
+      [disabled]="isLoading">
+      @if (isLoading) {
+        <ion-spinner name="crescent"></ion-spinner>
+      } @else {
+        <ion-icon name="logo-closed-captioning" slot="start"></ion-icon>
+        Login with Spotify
+      }
+    </ion-button>
+
+    <p class="app-muted-text ut-text-xs ion-text-center">
+      Requires a Spotify Premium account
+    </p>
+  </div>
+</ion-content>

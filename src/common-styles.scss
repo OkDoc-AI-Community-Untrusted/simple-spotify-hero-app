@@ -1,0 +1,36 @@
+/* App-specific reusable styles (app-* prefix) */
+
+.app-spotify-bg {
+  background: linear-gradient(135deg, #1DB954 0%, #121212 60%);
+}
+
+.app-now-playing-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #181818;
+  border-top: 1px solid #282828;
+}
+
+.app-track-image {
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.app-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.app-muted-text {
+  color: #b3b3b3;
+  font-size: 0.85rem;
+}
+
+.app-green-text {
+  color: #1DB954;
+}

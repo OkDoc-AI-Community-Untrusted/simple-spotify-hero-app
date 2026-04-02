@@ -1,0 +1,43 @@
+.search-bar {
+  --background: #282828;
+  --color: #ffffff;
+  --placeholder-color: #b3b3b3;
+  --icon-color: #b3b3b3;
+  --border-radius: 8px;
+}
+
+.results-list {
+  background: transparent;
+}
+
+.result-item {
+  --background: transparent;
+  --color: #ffffff;
+  --padding-start: 8px;
+  --inner-padding-end: 8px;
+  --min-height: 56px;
+
+  ion-thumbnail {
+    --size: 48px;
+    --border-radius: 4px;
+    margin-inline-end: 12px;
+  }
+
+  h3 {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  p {
+    font-size: 0.8rem;
+  }
+}
+
+.empty-state {
+  .empty-icon {
+    font-size: 48px;
+    color: #535353;
+    margin-bottom: 8px;
+  }
+}

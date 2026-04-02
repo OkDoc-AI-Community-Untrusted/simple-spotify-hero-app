@@ -1,0 +1,25 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+ion-toolbar {
+  --background: #000000;
+  --color: #ffffff;
+}
+
+ion-segment {
+  --background: transparent;
+}
+
+ion-segment-button {
+  --color: #b3b3b3;
+  --color-checked: #1DB954;
+  --indicator-color: #1DB954;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.has-player {
+  --padding-bottom: 80px;
+}

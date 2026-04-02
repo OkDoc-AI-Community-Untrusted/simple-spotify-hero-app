@@ -1,0 +1,52 @@
+/* Ionic core styles */
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+
+/* Ionic utility classes */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+@import "@ionic/angular/css/display.css";
+
+/* App shared styles */
+@import "common-styles";
+@import "util-styles";
+
+/* Spotify-dark theme via Ionic CSS variables */
+:root {
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18, 18, 18;
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+  --ion-color-primary: #1DB954;
+  --ion-color-primary-rgb: 29, 185, 84;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #19a34a;
+  --ion-color-primary-tint: #34c065;
+  --ion-color-secondary: #535353;
+  --ion-color-secondary-rgb: 83, 83, 83;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #494949;
+  --ion-color-secondary-tint: #646464;
+  --ion-card-background: #181818;
+  --ion-item-background: #181818;
+  --ion-toolbar-background: #000000;
+  --ion-tab-bar-background: #000000;
+}
+
+body {
+  background: #121212;
+  color: #ffffff;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+ion-content {
+  --background: #121212;
+}

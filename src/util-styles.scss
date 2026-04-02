@@ -1,0 +1,42 @@
+/* Generic atomic utilities (ut-* prefix) */
+
+.ut-flex { display: flex; }
+.ut-flex-col { display: flex; flex-direction: column; }
+.ut-flex-center { display: flex; align-items: center; justify-content: center; }
+.ut-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.ut-align-center { align-items: center; }
+.ut-justify-center { justify-content: center; }
+.ut-flex-1 { flex: 1; }
+.ut-flex-wrap { flex-wrap: wrap; }
+
+.ut-gap-4 { gap: 4px; }
+.ut-gap-8 { gap: 8px; }
+.ut-gap-12 { gap: 12px; }
+.ut-gap-16 { gap: 16px; }
+
+.ut-p-0 { padding: 0; }
+.ut-p-8 { padding: 8px; }
+.ut-p-12 { padding: 12px; }
+.ut-p-16 { padding: 16px; }
+.ut-px-16 { padding-left: 16px; padding-right: 16px; }
+.ut-py-8 { padding-top: 8px; padding-bottom: 8px; }
+
+.ut-m-0 { margin: 0; }
+.ut-mt-8 { margin-top: 8px; }
+.ut-mt-16 { margin-top: 16px; }
+.ut-mb-8 { margin-bottom: 8px; }
+.ut-mb-16 { margin-bottom: 16px; }
+
+.ut-w-100 { width: 100%; }
+.ut-h-100 { height: 100%; }
+
+.ut-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ut-text-sm { font-size: 0.85rem; }
+.ut-text-xs { font-size: 0.75rem; }
+.ut-font-bold { font-weight: 700; }
+.ut-pointer { cursor: pointer; }

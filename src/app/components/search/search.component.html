@@ -1,0 +1,80 @@
+<div class="search-wrapper ut-flex-col ut-gap-8 ut-p-8">
+  <ion-searchbar
+    placeholder="Search Spotify..."
+    (ionInput)="onSearchInput($any($event))"
+    debounce="0"
+    animated="true"
+    class="search-bar">
+  </ion-searchbar>
+
+  <ion-segment [value]="searchTab" (ionChange)="onTabChange($any($event))">
+    <ion-segment-button value="tracks">
+      <ion-label>Tracks</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="playlists">
+      <ion-label>Playlists</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  @if (isSearching) {
+    <div class="ut-flex ut-justify-center ut-p-16">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+    </div>
+  }
+
+  <!-- Track Results -->
+  @if (searchTab === 'tracks' && trackResults.length > 0) {
+    <ion-list lines="none" class="results-list">
+      @for (track of trackResults; track track.id) {
+        <ion-item button (click)="playTrack(track)" class="result-item">
+          @if (getAlbumImage(track)) {
+            <ion-thumbnail slot="start">
+              <img [src]="getAlbumImage(track)" [alt]="track.name">
+            </ion-thumbnail>
+          }
+          <ion-label>
+            <h3 class="ut-ellipsis">{{ track.name }}</h3>
+            <p class="app-muted-text ut-ellipsis">
+              {{ track.artists[0]?.name }} · {{ formatDuration(track.duration_ms) }}
+            </p>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
+
+  <!-- Playlist Results -->
+  @if (searchTab === 'playlists' && playlistResults.length > 0) {
+    <ion-list lines="none" class="results-list">
+      @for (playlist of playlistResults; track playlist.id) {
+        <ion-item button (click)="playPlaylist(playlist)" class="result-item">
+          @if (getPlaylistImage(playlist)) {
+            <ion-thumbnail slot="start">
+              <img [src]="getPlaylistImage(playlist)" [alt]="playlist.name">
+            </ion-thumbnail>
+          }
+          <ion-label>
+            <h3 class="ut-ellipsis">{{ playlist.name }}</h3>
+            <p class="app-muted-text ut-ellipsis">
+              {{ playlist.tracks.total }} tracks · {{ playlist.owner.display_name }}
+            </p>
+          </ion-label>
+        </ion-item>
+      }
+    </ion-list>
+  }
+
+  @if (!isSearching && searchTab === 'tracks' && trackResults.length === 0) {
+    <div class="empty-state ut-flex-col ut-align-center ut-p-32">
+      <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+      <p class="app-muted-text">Search for tracks</p>
+    </div>
+  }
+
+  @if (!isSearching && searchTab === 'playlists' && playlistResults.length === 0) {
+    <div class="empty-state ut-flex-col ut-align-center ut-p-32">
+      <ion-icon name="search-outline" class="empty-icon"></ion-icon>
+      <p class="app-muted-text">Search for playlists</p>
+    </div>
+  }
+</div>

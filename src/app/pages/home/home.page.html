@@ -1,0 +1,43 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>
+      <span class="app-green-text">Spotify</span> Hero
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="logout()" fill="clear" size="small">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [value]="activeTab" (ionChange)="onTabChanged($any($event))">
+      <ion-segment-button value="playlists">
+        <ion-label>My Playlists</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="search">
+        <ion-label>Search</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [class.has-player]="hasCurrentTrack">
+  @if (activeTab === 'playlists') {
+    @if (selectedPlaylist) {
+      <app-playlist-detail
+        [playlist]="selectedPlaylist"
+        (back)="onPlaylistBack()">
+      </app-playlist-detail>
+    } @else {
+      <app-playlists
+        (playlistSelected)="onPlaylistSelected($event)">
+      </app-playlists>
+    }
+  } @else {
+    <app-search></app-search>
+  }
+</ion-content>
+
+@if (hasCurrentTrack) {
+  <app-player></app-player>
+}

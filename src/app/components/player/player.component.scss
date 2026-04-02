@@ -1,0 +1,131 @@
+:host {
+  display: block;
+}
+
+/* Mini Player */
+.mini-player {
+  min-height: 56px;
+  cursor: pointer;
+}
+
+.mini-album-art {
+  width: 44px;
+  height: 44px;
+}
+
+.mini-track-name {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.mini-player ion-button {
+  --color: #ffffff;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Expanded Player */
+.expanded-player {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  background: linear-gradient(180deg, #282828 0%, #121212 40%);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.expanded-header {
+  flex-shrink: 0;
+}
+
+.expanded-header ion-button {
+  --color: #ffffff;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.expanded-content {
+  flex: 1;
+  padding-bottom: 24px;
+}
+
+.expanded-album-art {
+  width: min(280px, 70vw);
+  height: min(280px, 70vw);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.track-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.track-artist {
+  font-size: 1rem;
+  margin: 4px 0 0;
+}
+
+/* Seek & Volume */
+.seek-container {
+  margin-top: -8px;
+}
+
+.seek-range,
+.volume-range {
+  --bar-background: #535353;
+  --bar-background-active: #1DB954;
+  --bar-height: 4px;
+  --knob-size: 12px;
+  --knob-background: #ffffff;
+  padding: 0;
+}
+
+.time-labels {
+  margin-top: -6px;
+}
+
+.volume-container {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.volume-container ion-icon {
+  font-size: 18px;
+}
+
+/* Controls */
+.controls ion-button {
+  --color: #ffffff;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.play-pause-btn {
+  --background: #ffffff;
+  --color: #000000;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  width: 56px;
+  height: 56px;
+  font-size: 24px;
+}
+
+.control-btn {
+  font-size: 28px;
+}
+
+.active-control {
+  --color: #1DB954 !important;
+}
+
+.favorited {
+  color: #1DB954;
+}
