@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Connecting to Spotify...</title></head>
+<body>
+<script>
+  // Spotify redirects here (no hash fragment in redirect_uri).
+  // Forward the code/error params into the Angular hash-router callback route.
+  var base = window.location.pathname.replace(/\/callback\/?$/, '');
+  window.location.replace(
+    window.location.origin + base + '/#/callback' + window.location.search
+  );
+</script>
+</body>
+</html>

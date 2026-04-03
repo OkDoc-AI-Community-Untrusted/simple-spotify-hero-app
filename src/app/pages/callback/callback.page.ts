@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { IonContent, IonIcon, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { SpotifyAuthService } from '../../services/spotify-auth.service';
 
@@ -27,12 +27,16 @@ export class CallbackPage implements OnInit {
   constructor(
     private authService: SpotifyAuthService,
     private router: Router,
+    private route: ActivatedRoute,
   ) {}
 
   async ngOnInit(): Promise<void> {
-    const params: URLSearchParams = new URLSearchParams(window.location.search);
-    const code: string | null = params.get('code');
-    const errorParam: string | null = params.get('error');
+    // With HashLocationStrategy, Spotify redirects to /#/callback?code=xxx
+    // The query params live inside the hash fragment, so window.location.search
+    // is empty. Angular's ActivatedRoute correctly parses them from the hash.
+    const queryParams = this.route.snapshot.queryParams;
+    const code: string | null = queryParams['code'] ?? null;
+    const errorParam: string | null = queryParams['error'] ?? null;
 
     if (errorParam) {
       this.error = `Authorization denied: ${errorParam}`;
