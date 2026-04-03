@@ -38,6 +38,20 @@ export class CallbackPage implements OnInit {
     const code: string | null = queryParams['code'] ?? null;
     const errorParam: string | null = queryParams['error'] ?? null;
 
+    // Popup flow (opened from an iframe that has partitioned storage):
+    // The popup has a DIFFERENT localStorage partition than the iframe, so it
+    // cannot find the code_verifier stored by the iframe. Instead, send the
+    // code back to the opener (iframe) via postMessage and let the iframe do
+    // the token exchange with its own code_verifier.
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(
+        { type: 'spotify_callback', code, error: errorParam },
+        window.location.origin,
+      );
+      window.close();
+      return;
+    }
+
     if (errorParam) {
       this.error = `Authorization denied: ${errorParam}`;
       return;
@@ -50,12 +64,6 @@ export class CallbackPage implements OnInit {
 
     const success: boolean = await this.authService.handleCallback(code);
     if (success) {
-      // If opened as a popup (from the iframe login flow), close this window.
-      // The login page detects auth via the StorageEvent and navigates to /home.
-      if (window.opener && !window.opener.closed) {
-        window.close();
-        return;
-      }
       this.router.navigate(['/home'], { replaceUrl: true });
     } else {
       this.error = 'Failed to exchange authorization code. Please try again.';
