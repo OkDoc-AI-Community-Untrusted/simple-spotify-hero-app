@@ -1,4 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { SpotifySearchService } from './spotify-search.service';
 import { SpotifyPlaylistService } from './spotify-playlist.service';
@@ -7,6 +8,7 @@ import { SpotifyTrack } from '../models/spotify.interface';
 @Injectable({ providedIn: 'root' })
 export class OkDocService {
   private initialized = false;
+  private notifierSubscriptions: Subscription[] = [];
 
   constructor(
     private playerService: SpotifyPlayerService,
@@ -319,18 +321,22 @@ export class OkDocService {
 
   private setupNotifiers(OkDoc: any): void {
     // Notify on track change
-    this.playerService.currentTrack$.subscribe((track: SpotifyTrack | null) => {
-      if (track) {
-        const artistNames: string = track.artists.map((a) => a.name).join(', ');
-        OkDoc.notify(`Now playing: "${track.name}" by ${artistNames}`);
-      }
-    });
+    this.notifierSubscriptions.push(
+      this.playerService.currentTrack$.subscribe((track: SpotifyTrack | null) => {
+        if (track) {
+          const artistNames: string = track.artists.map((a) => a.name).join(', ');
+          OkDoc.notify(`Now playing: "${track.name}" by ${artistNames}`);
+        }
+      }),
+    );
 
     // Notify on playback state changes
-    this.playerService.isPlaying$.subscribe((isPlaying: boolean) => {
-      if (this.playerService.currentTrack$.value) {
-        OkDoc.notify(`Playback ${isPlaying ? 'resumed' : 'paused'}.`);
-      }
-    });
+    this.notifierSubscriptions.push(
+      this.playerService.isPlaying$.subscribe((isPlaying: boolean) => {
+        if (this.playerService.currentTrack$.value) {
+          OkDoc.notify(`Playback ${isPlaying ? 'resumed' : 'paused'}.`);
+        }
+      }),
+    );
   }
 }

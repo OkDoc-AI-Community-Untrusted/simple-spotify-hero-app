@@ -5,7 +5,6 @@ import { CommonModule } from '@angular/common';
 import { SpotifyAuthService } from '../../services/spotify-auth.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
 import { SpotifyPlaylistService } from '../../services/spotify-playlist.service';
-import { OkDocService } from '../../services/okdoc.service';
 import { PlayerComponent } from '../../components/player/player.component';
 import { SearchComponent } from '../../components/search/search.component';
 import { PlaylistsComponent } from '../../components/playlists/playlists.component';
@@ -35,7 +34,6 @@ export class HomePage implements OnInit, OnDestroy {
     private authService: SpotifyAuthService,
     private playerService: SpotifyPlayerService,
     private playlistService: SpotifyPlaylistService,
-    private okDocService: OkDocService,
     private router: Router,
   ) {}
 
@@ -48,7 +46,6 @@ export class HomePage implements OnInit, OnDestroy {
     // Initialize services
     this.playerService.initPlayer();
     this.playlistService.loadMyPlaylists();
-    this.okDocService.init();
 
     // Track whether we have a current track for showing the player bar
     this.playerService.currentTrack$.subscribe((track: SpotifyTrack | null) => {
