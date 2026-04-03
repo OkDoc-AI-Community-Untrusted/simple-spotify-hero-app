@@ -40,7 +40,13 @@ export class SpotifyAuthService {
     return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   }
 
-  async login(): Promise<void> {
+  /**
+   * Initiates the Spotify PKCE auth flow.
+   * Returns true when a popup was opened (iframe context) so the caller
+   * can listen for auth completion via the storage event instead of
+   * waiting for a page navigation.
+   */
+  async login(): Promise<boolean> {
     const codeVerifier: string = this.generateRandomString(64);
     localStorage.setItem(STORAGE_KEYS.CODE_VERIFIER, codeVerifier);
 
@@ -55,7 +61,19 @@ export class SpotifyAuthService {
       redirect_uri: environment.redirectUri,
     });
 
-    window.location.href = `${SPOTIFY_AUTH_URL}?${params.toString()}`;
+    const url = `${SPOTIFY_AUTH_URL}?${params.toString()}`;
+
+    // When running inside an iframe (e.g. OkDoc plugin), Spotify's
+    // frame-ancestors CSP blocks direct iframe navigation to accounts.spotify.com.
+    // Open OAuth in a popup instead; the callback page will close it and we
+    // detect auth completion via the StorageEvent fired on this window.
+    if (window.self !== window.top) {
+      window.open(url, 'spotify_auth', 'width=500,height=700,resizable=yes');
+      return true;
+    }
+
+    window.location.href = url;
+    return false;
   }
 
   async handleCallback(code: string): Promise<boolean> {
