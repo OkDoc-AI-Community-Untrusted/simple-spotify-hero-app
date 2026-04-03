@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonButton, IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { Subscription } from 'rxjs';
 import { SpotifyPlaylistService } from '../../services/spotify-playlist.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
@@ -9,7 +9,7 @@ import { TrackListComponent } from '../track-list/track-list.component';
 
 @Component({
   selector: 'app-playlist-detail',
-  imports: [IonicModule, CommonModule, TrackListComponent],
+  imports: [IonButton, IonIcon, IonSpinner, CommonModule, TrackListComponent],
   templateUrl: './playlist-detail.component.html',
   styleUrls: ['./playlist-detail.component.scss'],
 })

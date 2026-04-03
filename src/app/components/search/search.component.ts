@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonSearchbar, IonSegment, IonSegmentButton, IonLabel, IonSpinner, IonList, IonItem, IonThumbnail, IonIcon } from '@ionic/angular/standalone';
 import { Subject, Subscription, debounceTime, distinctUntilChanged, filter, tap } from 'rxjs';
 import { SpotifySearchService } from '../../services/spotify-search.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
@@ -9,7 +9,7 @@ import { SEARCH_DEBOUNCE_MS } from '../../models/constants';
 
 @Component({
   selector: 'app-search',
-  imports: [IonicModule, CommonModule],
+  imports: [IonSearchbar, IonSegment, IonSegmentButton, IonLabel, IonSpinner, IonList, IonItem, IonThumbnail, IonIcon, CommonModule],
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss'],
 })

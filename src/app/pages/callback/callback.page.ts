@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, IonIcon, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { SpotifyAuthService } from '../../services/spotify-auth.service';
 
 @Component({
   selector: 'app-callback',
-  imports: [IonicModule],
+  imports: [IonContent, IonIcon, IonButton, IonSpinner],
   template: `
     <ion-content class="ion-padding ut-flex-center">
       <div class="ut-flex-col ut-align-center ut-gap-16">

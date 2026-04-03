@@ -1,11 +1,11 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { IonicModule } from '@ionic/angular';
+import { IonList, IonItem, IonThumbnail, IonLabel } from '@ionic/angular/standalone';
 import { SpotifyTrack } from '../../models/spotify.interface';
 
 @Component({
   selector: 'app-track-list',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [IonicModule],
+  imports: [IonList, IonItem, IonThumbnail, IonLabel],
   template: `
     <ion-list lines="none" class="track-list">
       @for (track of tracks(); track $index; let i = $index) {

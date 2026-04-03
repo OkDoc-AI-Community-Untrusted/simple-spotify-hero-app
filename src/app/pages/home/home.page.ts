@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonSegment, IonSegmentButton, IonLabel, IonContent } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { SpotifyAuthService } from '../../services/spotify-auth.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
@@ -15,7 +15,8 @@ import { SpotifyPlaylist, SpotifyTrack } from '../../models/spotify.interface';
 @Component({
   selector: 'app-home',
   imports: [
-    IonicModule,
+    IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon,
+    IonSegment, IonSegmentButton, IonLabel, IonContent,
     CommonModule,
     PlayerComponent,
     SearchComponent,

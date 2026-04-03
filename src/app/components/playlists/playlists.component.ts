@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
+import { IonSpinner, IonIcon, IonList, IonItem, IonThumbnail, IonLabel } from '@ionic/angular/standalone';
 import { Subscription } from 'rxjs';
 import { SpotifyPlaylistService } from '../../services/spotify-playlist.service';
 import { SpotifyPlaylist } from '../../models/spotify.interface';
 
 @Component({
   selector: 'app-playlists',
-  imports: [IonicModule, CommonModule],
+  imports: [IonSpinner, IonIcon, IonList, IonItem, IonThumbnail, IonLabel, CommonModule],
   templateUrl: './playlists.component.html',
   styleUrls: ['./playlists.component.scss'],
 })

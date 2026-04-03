@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { IonicModule } from '@ionic/angular';
+import { IonContent, IonIcon, IonText, IonButton, IonSpinner } from '@ionic/angular/standalone';
 import { SpotifyAuthService } from '../../services/spotify-auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [IonicModule],
+  imports: [IonContent, IonIcon, IonText, IonButton, IonSpinner],
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
 })
