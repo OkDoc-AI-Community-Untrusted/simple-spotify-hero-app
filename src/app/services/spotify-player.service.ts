@@ -30,6 +30,7 @@ export class SpotifyPlayerService {
   readonly isReady$ = new BehaviorSubject<boolean>(false);
   readonly currentContextUri$ = new BehaviorSubject<string>('');
   readonly nowPlayingList$ = new BehaviorSubject<SpotifyTrack[]>([]);
+  readonly isPlayerExpanded$ = new BehaviorSubject<boolean>(false);
 
   constructor(
     private spotifyApi: SpotifyApiService,

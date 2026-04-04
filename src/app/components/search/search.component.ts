@@ -44,6 +44,12 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.playerService.currentTrack$.subscribe((track: SpotifyTrack | null) => {
         this.currentTrackUri = track?.uri ?? '';
       }),
+      // Switch the search sub-tab when a tool triggers navigation
+      this.searchService.requestedSearchTab$.subscribe((tab: 'tracks' | 'playlists' | null) => {
+        if (tab !== null) {
+          this.searchTab = tab;
+        }
+      }),
       this.searchSubject.pipe(
         debounceTime(SEARCH_DEBOUNCE_MS),
         distinctUntilChanged(),

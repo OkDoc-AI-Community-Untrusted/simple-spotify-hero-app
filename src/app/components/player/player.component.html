@@ -5,6 +5,12 @@
       <div class="mini-progress-fill" [style.width.%]="progressPercent"></div>
     </div>
     <div class="mini-content ut-flex ut-align-center ut-gap-8 ut-p-8">
+      <!-- Expand hint -->
+      <ion-button fill="clear" size="small" class="mini-expand-btn"
+                  (click)="toggleExpand(); $event.stopPropagation()"
+                  aria-label="Expand player">
+        <ion-icon name="chevron-up-outline" slot="icon-only"></ion-icon>
+      </ion-button>
       @if (albumImageUrl) {
         <img [src]="albumImageUrl" alt="Album art" class="mini-album-art app-track-image">
       }
@@ -34,7 +40,7 @@
       <ion-button fill="clear" size="small" (click)="toggleExpand()">
         <ion-icon name="chevron-down-outline" slot="icon-only"></ion-icon>
       </ion-button>
-      <span class="ut-flex-1 ion-text-center app-muted-text ut-text-sm">
+      <span class="ut-flex-1 ion-text-center app-muted-text ut-text-sm" (click)="toggleExpand()">
         {{ showQueue ? 'Now Playing List' : 'Now Playing' }}
       </span>
       @if (hasNowPlayingList) {

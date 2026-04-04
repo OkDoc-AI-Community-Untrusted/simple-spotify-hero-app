@@ -13,14 +13,24 @@ export class SpotifySearchService {
   readonly trackResults$ = new BehaviorSubject<SpotifyTrack[]>([]);
   readonly playlistResults$ = new BehaviorSubject<SpotifyPlaylist[]>([]);
   readonly isSearching$ = new BehaviorSubject<boolean>(false);
+  /** Emits the home-level tab that should be activated (null = no navigation) */
+  readonly requestedHomeTab$ = new BehaviorSubject<'playlists' | 'search' | null>(null);
+  /** Emits the search-sub-tab that should be activated (null = no navigation) */
+  readonly requestedSearchTab$ = new BehaviorSubject<'tracks' | 'playlists' | null>(null);
 
   constructor(private spotifyApi: SpotifyApiService) {}
+
+  navigateToSearchTab(homeTab: 'playlists' | 'search', searchTab: 'tracks' | 'playlists'): void {
+    this.requestedHomeTab$.next(homeTab);
+    this.requestedSearchTab$.next(searchTab);
+  }
 
   searchTracks(query: string): void {
     if (!query.trim()) {
       this.trackResults$.next([]);
       return;
     }
+    this.navigateToSearchTab('search', 'tracks');
     this.isSearching$.next(true);
     this.spotifyApi.search(query, 'track').subscribe({
       next: (result) => {
@@ -40,6 +50,7 @@ export class SpotifySearchService {
       this.playlistResults$.next([]);
       return;
     }
+    this.navigateToSearchTab('search', 'playlists');
     this.isSearching$.next(true);
     this.spotifyApi.search(query, 'playlist').subscribe({
       next: (result) => {

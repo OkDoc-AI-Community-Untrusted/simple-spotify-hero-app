@@ -41,6 +41,7 @@ export class OkDocService {
     this.registerSearchTools(OkDoc);
     this.registerPlaybackTools(OkDoc);
     this.registerPlaylistTools(OkDoc);
+    this.registerUiTools(OkDoc);
     this.setupNotifiers(OkDoc);
 
     this.initialized = true;
@@ -48,7 +49,7 @@ export class OkDocService {
 
   private registerSearchTools(OkDoc: any): void {
     OkDoc.registerTool('search_tracks', {
-      description: 'Search for tracks on Spotify. Returns a list of tracks with their IDs, names, artists, and albums.',
+      description: 'Search for tracks on Spotify. Automatically switches the UI to the Search tab (Tracks section). Returns a list of tracks with their IDs, names, artists, and albums.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -60,6 +61,7 @@ export class OkDocService {
         const query: string = String(args['query']);
         return new Promise<any>((resolve) => {
           this.ngZone.run(() => {
+            // searchTracks internally calls navigateToSearchTab('search', 'tracks')
             this.searchService.searchTracks(query);
           });
           // Wait for search to complete
@@ -78,7 +80,7 @@ export class OkDocService {
     });
 
     OkDoc.registerTool('search_playlists', {
-      description: 'Search for playlists on Spotify. Returns a list of playlists with their IDs, names, owners, and track counts.',
+      description: 'Search for playlists on Spotify. Automatically switches the UI to the Search tab (Playlists section). Returns a list of playlists with their IDs, names, owners, and track counts.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -90,6 +92,7 @@ export class OkDocService {
         const query: string = String(args['query']);
         return new Promise<any>((resolve) => {
           this.ngZone.run(() => {
+            // searchPlaylists internally calls navigateToSearchTab('search', 'playlists')
             this.searchService.searchPlaylists(query);
           });
           const sub = this.searchService.isSearching$.subscribe((searching: boolean) => {
@@ -315,6 +318,53 @@ export class OkDocService {
           this.playerService.playContextUri(`spotify:playlist:${id}`);
         });
         return { content: [{ type: 'text', text: `Playing playlist ${id}` }] };
+      },
+    });
+  }
+
+  private registerUiTools(OkDoc: any): void {
+    OkDoc.registerTool('switch_search_tab', {
+      description: 'Switch the UI to the Search page and select either the Tracks or Playlists section within it.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          section: {
+            type: 'string',
+            enum: ['tracks', 'playlists'],
+            description: 'Which section to show in the Search tab: "tracks" or "playlists"',
+          },
+        },
+        required: ['section'],
+      },
+      handler: async (args: Record<string, unknown>) => {
+        const section = String(args['section']) as 'tracks' | 'playlists';
+        this.ngZone.run(() => {
+          this.searchService.navigateToSearchTab('search', section);
+        });
+        return { content: [{ type: 'text', text: `Switched to Search tab — ${section} section.` }] };
+      },
+    });
+
+    OkDoc.registerTool('expand_player', {
+      description: 'Expand the player to show full playback controls, album art, and the seek/volume sliders.',
+      handler: async () => {
+        if (!this.playerService.currentTrack$.value) {
+          return { content: [{ type: 'text', text: 'No track is currently loaded.' }], isError: true };
+        }
+        this.ngZone.run(() => {
+          this.playerService.isPlayerExpanded$.next(true);
+        });
+        return { content: [{ type: 'text', text: 'Player expanded.' }] };
+      },
+    });
+
+    OkDoc.registerTool('collapse_player', {
+      description: 'Collapse the player back to the mini player bar at the bottom.',
+      handler: async () => {
+        this.ngZone.run(() => {
+          this.playerService.isPlayerExpanded$.next(false);
+        });
+        return { content: [{ type: 'text', text: 'Player collapsed.' }] };
       },
     });
   }

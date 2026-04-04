@@ -40,6 +40,15 @@
   min-height: 44px;
 }
 
+.mini-expand-btn {
+  --color: #1DB954;
+  font-size: 14px;
+  min-width: 32px;
+  min-height: 44px;
+  --padding-start: 4px;
+  --padding-end: 0;
+}
+
 /* Expanded Player */
 .expanded-player {
   position: fixed;
@@ -165,4 +174,115 @@
 .queue-now-playing ion-button {
   min-width: 44px;
   min-height: 44px;
+}
+
+/* ---- Responsive: short / small screens ---- */
+
+/* Landscape phones & small height viewports */
+@media (max-height: 320px) {
+  .expanded-album-art {
+    display: none;
+  }
+
+  .expanded-content {
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+
+  .track-name {
+    font-size: 1rem;
+  }
+
+  .track-artist {
+    font-size: 0.85rem;
+    margin: 2px 0 0;
+  }
+
+  .play-pause-btn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* Landscape phones & small height viewports */
+@media (max-height: 540px) {
+  .expanded-album-art {
+    width: min(64px, 28vw);
+    height: min(64px, 28vw);
+  }
+
+  .expanded-content {
+    gap: 8px;
+    padding-bottom: 12px;
+  }
+
+  .track-name {
+    font-size: 1rem;
+  }
+
+  .track-artist {
+    font-size: 0.85rem;
+    margin: 2px 0 0;
+  }
+
+  .play-pause-btn {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Narrow screens — fit expanded controls inside 320 px */
+@media (max-width: 360px) {
+  .expanded-album-art {
+    width: min(160px, 55vw);
+    height: min(160px, 55vw);
+  }
+
+  .expanded-content {
+    padding-left: 8px;
+    padding-right: 8px;
+    gap: 10px;
+  }
+
+  .track-name {
+    font-size: 1rem;
+  }
+
+  .track-artist {
+    font-size: 0.85rem;
+  }
+
+  /* Tighter controls row so all 5 buttons fit in ~280 px */
+  .controls {
+    gap: 2px !important;
+  }
+
+  .controls ion-button {
+    min-width: 36px;
+    min-height: 36px;
+    --padding-start: 2px;
+    --padding-end: 2px;
+    font-size: 18px;
+  }
+
+  .control-btn {
+    font-size: 20px;
+  }
+
+  .play-pause-btn {
+    width: 44px;
+    height: 44px;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    font-size: 18px;
+  }
+
+  .volume-container {
+    max-width: 100%;
+  }
+
+  .seek-range,
+  .volume-range {
+    --knob-size: 10px;
+  }
 }

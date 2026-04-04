@@ -58,6 +58,13 @@ export class PlayerComponent implements OnInit, OnDestroy {
       this.playerService.nowPlayingList$.subscribe((tracks: SpotifyTrack[]) => {
         this.nowPlayingTracks = tracks;
       }),
+      // Expand/collapse player from tool calls
+      this.playerService.isPlayerExpanded$.subscribe((expanded: boolean) => {
+        this.isExpanded = expanded;
+        if (!expanded) {
+          this.showQueue = false;
+        }
+      }),
     );
   }
 
@@ -101,14 +108,15 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   toggleExpand(): void {
-    this.isExpanded = !this.isExpanded;
-    if (!this.isExpanded) {
+    const next = !this.isExpanded;
+    this.playerService.isPlayerExpanded$.next(next);
+    if (!next) {
       this.showQueue = false;
     }
   }
 
   expandToQueue(): void {
-    this.isExpanded = true;
+    this.playerService.isPlayerExpanded$.next(true);
     this.showQueue = true;
   }
 
