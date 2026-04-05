@@ -1,9 +1,12 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { SpotifyAuthService } from './spotify-auth.service';
 import { SpotifyPlayerService } from './spotify-player.service';
 import { SpotifySearchService } from './spotify-search.service';
 import { SpotifyPlaylistService } from './spotify-playlist.service';
 import { SpotifyTrack } from '../models/spotify.interface';
+
+const AUTH_REQUIRED_MESSAGE = 'Not authenticated. Please open the Spotify Hero App and log in with your Spotify Premium account first.';
 
 @Injectable({ providedIn: 'root' })
 export class OkDocService {
@@ -11,11 +14,16 @@ export class OkDocService {
   private notifierSubscriptions: Subscription[] = [];
 
   constructor(
+    private authService: SpotifyAuthService,
     private playerService: SpotifyPlayerService,
     private searchService: SpotifySearchService,
     private playlistService: SpotifyPlaylistService,
     private ngZone: NgZone,
   ) {}
+
+  private notAuthenticated() {
+    return { content: [{ type: 'text' as const, text: AUTH_REQUIRED_MESSAGE }], isError: true };
+  }
 
   init(): void {
     if (this.initialized) {
@@ -58,22 +66,24 @@ export class OkDocService {
         required: ['query'],
       },
       handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const query: string = String(args['query']);
         return new Promise<any>((resolve) => {
           this.ngZone.run(() => {
             // searchTracks internally calls navigateToSearchTab('search', 'tracks')
             this.searchService.searchTracks(query);
           });
-          // Wait for search to complete
+          // Wait for the loading flag to go true then false
+          let started = false;
           const sub = this.searchService.isSearching$.subscribe((searching: boolean) => {
-            if (!searching) {
-              sub.unsubscribe();
-              const results = this.searchService.getTrackResultsForTool();
-              resolve({
-                content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
-                structuredContent: { results },
-              });
-            }
+            if (searching) { started = true; return; }
+            if (!started) return;
+            sub.unsubscribe();
+            const results = this.searchService.getTrackResultsForTool();
+            resolve({
+              content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+              structuredContent: { results },
+            });
           });
         });
       },
@@ -89,21 +99,23 @@ export class OkDocService {
         required: ['query'],
       },
       handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const query: string = String(args['query']);
         return new Promise<any>((resolve) => {
           this.ngZone.run(() => {
             // searchPlaylists internally calls navigateToSearchTab('search', 'playlists')
             this.searchService.searchPlaylists(query);
           });
+          let started = false;
           const sub = this.searchService.isSearching$.subscribe((searching: boolean) => {
-            if (!searching) {
-              sub.unsubscribe();
-              const results = this.searchService.getPlaylistResultsForTool();
-              resolve({
-                content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
-                structuredContent: { results },
-              });
-            }
+            if (searching) { started = true; return; }
+            if (!started) return;
+            sub.unsubscribe();
+            const results = this.searchService.getPlaylistResultsForTool();
+            resolve({
+              content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+              structuredContent: { results },
+            });
           });
         });
       },
@@ -121,6 +133,7 @@ export class OkDocService {
         required: ['id'],
       },
       handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const id: string = String(args['id']);
         this.ngZone.run(() => {
           this.playerService.playTrackUri(`spotify:track:${id}`);
@@ -132,6 +145,7 @@ export class OkDocService {
     OkDoc.registerTool('play', {
       description: 'Resume playback of the current track.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         this.ngZone.run(() => {
           this.playerService.resume();
         });
@@ -142,6 +156,7 @@ export class OkDocService {
     OkDoc.registerTool('pause', {
       description: 'Pause the current playback.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         this.ngZone.run(() => {
           this.playerService.pause();
         });
@@ -152,6 +167,7 @@ export class OkDocService {
     OkDoc.registerTool('next_track', {
       description: 'Skip to the next track.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         this.ngZone.run(() => {
           this.playerService.nextTrack();
         });
@@ -162,6 +178,7 @@ export class OkDocService {
     OkDoc.registerTool('previous_track', {
       description: 'Go back to the previous track.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         this.ngZone.run(() => {
           this.playerService.previousTrack();
         });
@@ -179,6 +196,7 @@ export class OkDocService {
         required: ['position_seconds'],
       },
       handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const posMs: number = Number(args['position_seconds']) * 1000;
         this.ngZone.run(() => {
           this.playerService.seek(posMs);
@@ -197,6 +215,7 @@ export class OkDocService {
         required: ['volume'],
       },
       handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const vol: number = Number(args['volume']);
         this.ngZone.run(() => {
           this.playerService.setVolume(vol);
@@ -208,6 +227,7 @@ export class OkDocService {
     OkDoc.registerTool('toggle_shuffle', {
       description: 'Toggle shuffle mode on or off.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         this.ngZone.run(() => {
           this.playerService.toggleShuffle();
         });
@@ -219,6 +239,7 @@ export class OkDocService {
     OkDoc.registerTool('volume_up', {
       description: 'Increase the playback volume by 10%.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const current: number = this.playerService.volume$.value;
         const newVol: number = Math.min(100, current + 10);
         this.ngZone.run(() => {
@@ -231,6 +252,7 @@ export class OkDocService {
     OkDoc.registerTool('volume_down', {
       description: 'Decrease the playback volume by 10%.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const current: number = this.playerService.volume$.value;
         const newVol: number = Math.max(0, current - 10);
         this.ngZone.run(() => {
@@ -243,6 +265,7 @@ export class OkDocService {
     OkDoc.registerTool('toggle_favorite', {
       description: 'Save or remove the current track from your library.',
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const wasFavorited: boolean = this.playerService.isFavorited$.value;
         this.ngZone.run(() => {
           this.playerService.toggleFavorite();
@@ -257,6 +280,7 @@ export class OkDocService {
       description: 'Get the current playback state including track info, position, volume, and shuffle status.',
       annotations: { readOnlyHint: true },
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const track: SpotifyTrack | null = this.playerService.currentTrack$.value;
         const state = {
           isPlaying: this.playerService.isPlaying$.value,
@@ -285,19 +309,19 @@ export class OkDocService {
       description: 'Get the current user\'s playlists with IDs, names, owners, and track counts.',
       annotations: { readOnlyHint: true },
       handler: async () => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         return new Promise<any>((resolve) => {
-          this.ngZone.run(() => {
-            this.playlistService.loadMyPlaylists();
-          });
+          this.ngZone.run(() => { this.playlistService.loadMyPlaylists(); });
+          let started = false;
           const sub = this.playlistService.isLoading$.subscribe((loading: boolean) => {
-            if (!loading) {
-              sub.unsubscribe();
-              const results = this.playlistService.getPlaylistsForTool();
-              resolve({
-                content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
-                structuredContent: { results },
-              });
-            }
+            if (loading) { started = true; return; }
+            if (!started) return;
+            sub.unsubscribe();
+            const results = this.playlistService.getPlaylistsForTool();
+            resolve({
+              content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+              structuredContent: { results },
+            });
           });
         });
       },
@@ -313,6 +337,7 @@ export class OkDocService {
         required: ['id'],
       },
       handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
         const id: string = String(args['id']);
         this.ngZone.run(() => {
           this.playerService.playContextUri(`spotify:playlist:${id}`);
