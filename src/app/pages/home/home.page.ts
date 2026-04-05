@@ -11,7 +11,8 @@ import { PlayerComponent } from '../../components/player/player.component';
 import { SearchComponent } from '../../components/search/search.component';
 import { PlaylistsComponent } from '../../components/playlists/playlists.component';
 import { PlaylistDetailComponent } from '../../components/playlist-detail/playlist-detail.component';
-import { SpotifyPlaylist, SpotifyTrack } from '../../models/spotify.interface';
+import { PodcastDetailComponent } from '../../components/podcast-detail/podcast-detail.component';
+import { SpotifyPlaylist, SpotifyTrack, SpotifyShow } from '../../models/spotify.interface';
 
 @Component({
   selector: 'app-home',
@@ -23,6 +24,7 @@ import { SpotifyPlaylist, SpotifyTrack } from '../../models/spotify.interface';
     SearchComponent,
     PlaylistsComponent,
     PlaylistDetailComponent,
+    PodcastDetailComponent,
   ],
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
@@ -30,6 +32,7 @@ import { SpotifyPlaylist, SpotifyTrack } from '../../models/spotify.interface';
 export class HomePage implements OnInit, OnDestroy {
   activeTab: 'playlists' | 'search' = 'playlists';
   selectedPlaylist: SpotifyPlaylist | null = null;
+  selectedPodcast: SpotifyShow | null = null;
   hasCurrentTrack = false;
 
   private readonly subscriptions: Subscription[] = [];
@@ -75,14 +78,25 @@ export class HomePage implements OnInit, OnDestroy {
   onTabChanged(event: CustomEvent): void {
     this.activeTab = event.detail.value as 'playlists' | 'search';
     this.selectedPlaylist = null;
+    this.selectedPodcast = null;
   }
 
   onPlaylistSelected(playlist: SpotifyPlaylist): void {
     this.selectedPlaylist = playlist;
+    this.selectedPodcast = null;
   }
 
   onPlaylistBack(): void {
     this.selectedPlaylist = null;
+  }
+
+  onPodcastSelected(show: SpotifyShow): void {
+    this.selectedPodcast = show;
+    this.selectedPlaylist = null;
+  }
+
+  onPodcastBack(): void {
+    this.selectedPodcast = null;
   }
 
   refresh(): void {

@@ -1,0 +1,31 @@
+.detail-header {
+  background: #181818;
+  border-bottom: 1px solid #282828;
+}
+
+.detail-header ion-button[fill="clear"] {
+  --color: #ffffff;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.header-image {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+}
+
+.header-title {
+  color: #ffffff;
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.empty-state {
+  .empty-icon {
+    font-size: 48px;
+    color: #535353;
+    margin-bottom: 8px;
+  }
+}

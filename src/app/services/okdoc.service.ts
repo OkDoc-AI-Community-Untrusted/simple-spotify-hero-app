@@ -49,6 +49,7 @@ export class OkDocService {
     this.registerSearchTools(OkDoc);
     this.registerPlaybackTools(OkDoc);
     this.registerPlaylistTools(OkDoc);
+    this.registerPodcastTools(OkDoc);
     this.registerUiTools(OkDoc);
     this.setupNotifiers(OkDoc);
 
@@ -112,6 +113,37 @@ export class OkDocService {
             if (!started) return;
             sub.unsubscribe();
             const results = this.searchService.getPlaylistResultsForTool();
+            resolve({
+              content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
+              structuredContent: { results },
+            });
+          });
+        });
+      },
+    });
+
+    OkDoc.registerTool('search_podcasts', {
+      description: 'Search for podcast shows on Spotify. Automatically switches the UI to the Search tab (Podcasts section). Returns a list of shows with their IDs, names, publishers, and episode counts.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          query: { type: 'string', description: 'Search query for podcasts / shows' },
+        },
+        required: ['query'],
+      },
+      handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
+        const query: string = String(args['query']);
+        return new Promise<any>((resolve) => {
+          this.ngZone.run(() => {
+            this.searchService.searchPodcasts(query);
+          });
+          let started = false;
+          const sub = this.searchService.isSearching$.subscribe((searching: boolean) => {
+            if (searching) { started = true; return; }
+            if (!started) return;
+            sub.unsubscribe();
+            const results = this.searchService.getPodcastResultsForTool();
             resolve({
               content: [{ type: 'text', text: JSON.stringify(results, null, 2) }],
               structuredContent: { results },
@@ -304,6 +336,48 @@ export class OkDocService {
     });
   }
 
+  private registerPodcastTools(OkDoc: any): void {
+    OkDoc.registerTool('play_show', {
+      description: 'Start playing a podcast show by its Spotify ID (from search_podcasts results). Plays from the first / most-recent episode.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'Spotify show ID' },
+        },
+        required: ['id'],
+      },
+      handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
+        const id: string = String(args['id']);
+        this.ngZone.run(() => {
+          this.playerService.playContextUri(`spotify:show:${id}`);
+        });
+        return { content: [{ type: 'text', text: `Playing podcast show ${id}` }] };
+      },
+    });
+
+    OkDoc.registerTool('play_episode', {
+      description: 'Play a specific podcast episode by its show ID and episode ID.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          show_id: { type: 'string', description: 'Spotify show ID (the podcast)' },
+          episode_id: { type: 'string', description: 'Spotify episode ID to start from' },
+        },
+        required: ['show_id', 'episode_id'],
+      },
+      handler: async (args: Record<string, unknown>) => {
+        if (!this.authService.isAuthenticated()) return this.notAuthenticated();
+        const showId: string = String(args['show_id']);
+        const episodeId: string = String(args['episode_id']);
+        this.ngZone.run(() => {
+          this.playerService.playContextUri(`spotify:show:${showId}`, `spotify:episode:${episodeId}`);
+        });
+        return { content: [{ type: 'text', text: `Playing episode ${episodeId} from show ${showId}` }] };
+      },
+    });
+  }
+
   private registerPlaylistTools(OkDoc: any): void {
     OkDoc.registerTool('get_my_playlists', {
       description: 'Get the current user\'s playlists with IDs, names, owners, and track counts.',
@@ -349,20 +423,20 @@ export class OkDocService {
 
   private registerUiTools(OkDoc: any): void {
     OkDoc.registerTool('switch_search_tab', {
-      description: 'Switch the UI to the Search page and select either the Tracks or Playlists section within it.',
+      description: 'Switch the UI to the Search page and select the Tracks, Playlists, or Podcasts section within it.',
       inputSchema: {
         type: 'object',
         properties: {
           section: {
             type: 'string',
-            enum: ['tracks', 'playlists'],
-            description: 'Which section to show in the Search tab: "tracks" or "playlists"',
+            enum: ['tracks', 'playlists', 'podcasts'],
+            description: 'Which section to show in the Search tab: "tracks", "playlists", or "podcasts"',
           },
         },
         required: ['section'],
       },
       handler: async (args: Record<string, unknown>) => {
-        const section = String(args['section']) as 'tracks' | 'playlists';
+        const section = String(args['section']) as 'tracks' | 'playlists' | 'podcasts';
         this.ngZone.run(() => {
           this.searchService.navigateToSearchTab('search', section);
         });

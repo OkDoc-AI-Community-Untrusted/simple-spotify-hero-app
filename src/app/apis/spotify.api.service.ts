@@ -8,6 +8,7 @@ import {
   SpotifyPlaylist,
   SpotifyPlaylistTrack,
   SpotifyTrack,
+  SpotifyEpisode,
 } from '../models/spotify.interface';
 
 @Injectable({ providedIn: 'root' })
@@ -48,6 +49,16 @@ export class SpotifyApiService {
       .set('offset', offset.toString());
     return this.http.get<SpotifyPaginated<SpotifyPlaylistTrack>>(
       `${SPOTIFY_API_BASE}/playlists/${encodeURIComponent(playlistId)}/items`,
+      { params }
+    );
+  }
+
+  getShowEpisodes(showId: string, limit: number = 50, offset: number = 0): Observable<SpotifyPaginated<SpotifyEpisode>> {
+    const params: HttpParams = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString());
+    return this.http.get<SpotifyPaginated<SpotifyEpisode>>(
+      `${SPOTIFY_API_BASE}/shows/${encodeURIComponent(showId)}/episodes`,
       { params }
     );
   }

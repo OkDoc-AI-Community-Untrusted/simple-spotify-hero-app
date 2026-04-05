@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SpotifyApiService } from '../apis/spotify.api.service';
-import { SpotifyTrack, SpotifyPlaylist } from '../models/spotify.interface';
+import { SpotifyTrack, SpotifyPlaylist, SpotifyShow } from '../models/spotify.interface';
 
 export interface SearchResults {
   tracks: SpotifyTrack[];
@@ -12,15 +12,16 @@ export interface SearchResults {
 export class SpotifySearchService {
   readonly trackResults$ = new BehaviorSubject<SpotifyTrack[]>([]);
   readonly playlistResults$ = new BehaviorSubject<SpotifyPlaylist[]>([]);
+  readonly podcastResults$ = new BehaviorSubject<SpotifyShow[]>([]);
   readonly isSearching$ = new BehaviorSubject<boolean>(false);
   /** Emits the home-level tab that should be activated (null = no navigation) */
   readonly requestedHomeTab$ = new BehaviorSubject<'playlists' | 'search' | null>(null);
   /** Emits the search-sub-tab that should be activated (null = no navigation) */
-  readonly requestedSearchTab$ = new BehaviorSubject<'tracks' | 'playlists' | null>(null);
+  readonly requestedSearchTab$ = new BehaviorSubject<'tracks' | 'playlists' | 'podcasts' | null>(null);
 
   constructor(private spotifyApi: SpotifyApiService) {}
 
-  navigateToSearchTab(homeTab: 'playlists' | 'search', searchTab: 'tracks' | 'playlists'): void {
+  navigateToSearchTab(homeTab: 'playlists' | 'search', searchTab: 'tracks' | 'playlists' | 'podcasts'): void {
     this.requestedHomeTab$.next(homeTab);
     this.requestedSearchTab$.next(searchTab);
   }
@@ -65,6 +66,26 @@ export class SpotifySearchService {
     });
   }
 
+  searchPodcasts(query: string): void {
+    if (!query.trim()) {
+      this.podcastResults$.next([]);
+      return;
+    }
+    this.navigateToSearchTab('search', 'podcasts');
+    this.isSearching$.next(true);
+    this.spotifyApi.search(query, 'show').subscribe({
+      next: (result) => {
+        const shows: SpotifyShow[] = (result.shows?.items ?? []).filter((s): s is SpotifyShow => s != null && s.id != null);
+        this.podcastResults$.next(shows);
+        this.isSearching$.next(false);
+      },
+      error: () => {
+        this.podcastResults$.next([]);
+        this.isSearching$.next(false);
+      },
+    });
+  }
+
   getTrackResultsForTool(): { id: string; name: string; artist: string; album: string }[] {
     return this.trackResults$.value.map((t: SpotifyTrack) => ({
       id: t.id,
@@ -80,6 +101,15 @@ export class SpotifySearchService {
       name: p.name,
       owner: p.owner.display_name,
       trackCount: p.items?.total ?? 0,
+    }));
+  }
+
+  getPodcastResultsForTool(): { id: string; name: string; publisher: string; totalEpisodes: number }[] {
+    return this.podcastResults$.value.map((s: SpotifyShow) => ({
+      id: s.id,
+      name: s.name,
+      publisher: s.publisher,
+      totalEpisodes: s.total_episodes,
     }));
   }
 }

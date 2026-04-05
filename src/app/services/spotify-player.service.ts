@@ -2,7 +2,7 @@ import { Injectable, NgZone } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { SpotifyApiService } from '../apis/spotify.api.service';
 import { SpotifyAuthService } from './spotify-auth.service';
-import { SpotifyTrack } from '../models/spotify.interface';
+import { SpotifyTrack, SpotifyEpisode } from '../models/spotify.interface';
 import { PLAYER_NAME, DEFAULT_VOLUME, POSITION_POLL_INTERVAL_MS } from '../models/constants';
 
 declare global {
@@ -30,6 +30,8 @@ export class SpotifyPlayerService {
   readonly isReady$ = new BehaviorSubject<boolean>(false);
   readonly currentContextUri$ = new BehaviorSubject<string>('');
   readonly nowPlayingList$ = new BehaviorSubject<SpotifyTrack[]>([]);
+  readonly nowPlayingEpisodes$ = new BehaviorSubject<SpotifyEpisode[]>([]);
+  readonly nowPlayingType$ = new BehaviorSubject<'track' | 'episode'>('track');
   readonly isPlayerExpanded$ = new BehaviorSubject<boolean>(false);
 
   constructor(
@@ -270,6 +272,14 @@ export class SpotifyPlayerService {
 
   setNowPlayingList(tracks: SpotifyTrack[]): void {
     this.nowPlayingList$.next(tracks);
+    this.nowPlayingEpisodes$.next([]);
+    this.nowPlayingType$.next('track');
+  }
+
+  setNowPlayingEpisodes(episodes: SpotifyEpisode[]): void {
+    this.nowPlayingEpisodes$.next(episodes);
+    this.nowPlayingList$.next([]);
+    this.nowPlayingType$.next('episode');
   }
 
   playTrackUri(uri: string): void {

@@ -48,6 +48,29 @@ export interface SpotifyPlaylistTrack {
   added_at: string;
 }
 
+export interface SpotifyShow {
+  id: string;
+  name: string;
+  description: string;
+  publisher: string;
+  images: SpotifyImage[];
+  uri: string;
+  total_episodes: number;
+  media_type: string;
+}
+
+export interface SpotifyEpisode {
+  id: string;
+  name: string;
+  uri: string;
+  duration_ms: number;
+  description: string;
+  images: SpotifyImage[];
+  release_date: string;
+  is_playable: boolean;
+  show?: SpotifyShow;
+}
+
 export interface SpotifyPaginated<T> {
   href: string;
   items: T[];
@@ -61,6 +84,7 @@ export interface SpotifyPaginated<T> {
 export interface SpotifySearchResult {
   tracks?: SpotifyPaginated<SpotifyTrack>;
   playlists?: SpotifyPaginated<SpotifyPlaylist>;
+  shows?: SpotifyPaginated<SpotifyShow>;
 }
 
 export interface SpotifyTokenResponse {

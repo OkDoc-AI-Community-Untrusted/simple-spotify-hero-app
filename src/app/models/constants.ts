@@ -15,6 +15,7 @@ export const SPOTIFY_SCOPES = [
   'playlist-read-private',
   'playlist-read-collaborative',
   'playlist-modify-public',
+  'user-read-playback-position',
 ].join(' ');
 
 export const SEARCH_DEBOUNCE_MS = 500;

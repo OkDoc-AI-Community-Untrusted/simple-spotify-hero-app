@@ -4,7 +4,7 @@ import { IonSearchbar, IonSegment, IonSegmentButton, IonLabel, IonSpinner, IonLi
 import { Subject, Subscription, debounceTime, distinctUntilChanged, filter, tap } from 'rxjs';
 import { SpotifySearchService } from '../../services/spotify-search.service';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
-import { SpotifyTrack, SpotifyPlaylist } from '../../models/spotify.interface';
+import { SpotifyTrack, SpotifyPlaylist, SpotifyShow } from '../../models/spotify.interface';
 import { SEARCH_DEBOUNCE_MS } from '../../models/constants';
 
 @Component({
@@ -15,11 +15,13 @@ import { SEARCH_DEBOUNCE_MS } from '../../models/constants';
 })
 export class SearchComponent implements OnInit, OnDestroy {
   playlistSelected = output<SpotifyPlaylist>();
+  podcastSelected = output<SpotifyShow>();
 
   trackResults: SpotifyTrack[] = [];
   playlistResults: SpotifyPlaylist[] = [];
+  podcastResults: SpotifyShow[] = [];
   isSearching = false;
-  searchTab: 'tracks' | 'playlists' = 'tracks';
+  searchTab: 'tracks' | 'playlists' | 'podcasts' = 'tracks';
   currentTrackUri = '';
 
   private searchSubject = new Subject<string>();
@@ -38,6 +40,9 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.searchService.playlistResults$.subscribe((playlists: SpotifyPlaylist[]) => {
         this.playlistResults = playlists;
       }),
+      this.searchService.podcastResults$.subscribe((shows: SpotifyShow[]) => {
+        this.podcastResults = shows;
+      }),
       this.searchService.isSearching$.subscribe((searching: boolean) => {
         this.isSearching = searching;
       }),
@@ -45,7 +50,7 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.currentTrackUri = track?.uri ?? '';
       }),
       // Switch the search sub-tab when a tool triggers navigation
-      this.searchService.requestedSearchTab$.subscribe((tab: 'tracks' | 'playlists' | null) => {
+      this.searchService.requestedSearchTab$.subscribe((tab: 'tracks' | 'playlists' | 'podcasts' | null) => {
         if (tab !== null) {
           this.searchTab = tab;
         }
@@ -57,8 +62,10 @@ export class SearchComponent implements OnInit, OnDestroy {
         tap((query: string) => {
           if (this.searchTab === 'tracks') {
             this.searchService.searchTracks(query);
-          } else {
+          } else if (this.searchTab === 'playlists') {
             this.searchService.searchPlaylists(query);
+          } else {
+            this.searchService.searchPodcasts(query);
           }
         }),
       ).subscribe(),
@@ -75,7 +82,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   onTabChange(event: CustomEvent): void {
-    this.searchTab = event.detail.value as 'tracks' | 'playlists';
+    this.searchTab = event.detail.value as 'tracks' | 'playlists' | 'podcasts';
   }
 
   playTrack(track: SpotifyTrack): void {
@@ -87,6 +94,10 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.playlistSelected.emit(playlist);
   }
 
+  openPodcast(show: SpotifyShow): void {
+    this.podcastSelected.emit(show);
+  }
+
   getAlbumImage(track: SpotifyTrack): string {
     const images = track.album.images;
     return images.length > 1 ? images[1].url : images.length > 0 ? images[0].url : '';
@@ -94,6 +105,10 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   getPlaylistImage(playlist: SpotifyPlaylist): string {
     return playlist.images.length > 0 ? playlist.images[0].url : '';
+  }
+
+  getPodcastImage(show: SpotifyShow): string {
+    return show.images.length > 0 ? show.images[0].url : '';
   }
 
   formatDuration(ms: number): string {

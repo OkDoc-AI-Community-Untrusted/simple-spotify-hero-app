@@ -1,0 +1,40 @@
+<div class="detail-header ut-flex ut-align-center ut-gap-12 ut-p-12">
+  <ion-button fill="clear" size="small" (click)="goBack()">
+    <ion-icon name="arrow-back-outline" slot="icon-only"></ion-icon>
+  </ion-button>
+
+  @if (podcastImage) {
+    <img [src]="podcastImage" [alt]="podcast().name" class="header-image app-track-image">
+  }
+
+  <div class="header-info ut-flex-1">
+    <h2 class="header-title ut-ellipsis">{{ podcast().name }}</h2>
+    <p class="app-muted-text ut-text-sm">{{ episodeCount }} episodes · {{ podcast().publisher }}</p>
+  </div>
+
+  <ion-button fill="solid" color="primary" shape="round" size="small" (click)="playAll()">
+    <ion-icon name="play" slot="start"></ion-icon>
+    Play
+  </ion-button>
+</div>
+
+@if (isLoading) {
+  <div class="ut-flex ut-justify-center ut-p-16">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+  </div>
+}
+
+@if (!isLoading && episodes.length > 0) {
+  <app-episode-list
+    [episodes]="episodes"
+    [currentEpisodeUri]="currentEpisodeUri"
+    (episodeClicked)="playEpisode($event)">
+  </app-episode-list>
+}
+
+@if (!isLoading && episodes.length === 0) {
+  <div class="empty-state ut-flex-col ut-align-center ut-p-32">
+    <ion-icon name="mic-outline" class="empty-icon"></ion-icon>
+    <p class="app-muted-text">No episodes available</p>
+  </div>
+}

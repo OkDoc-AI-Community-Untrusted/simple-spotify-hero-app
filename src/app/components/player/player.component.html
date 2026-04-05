@@ -71,12 +71,21 @@
             <ion-icon [name]="isPlaying ? 'pause' : 'play'" slot="icon-only"></ion-icon>
           </ion-button>
         </div>
-        <app-track-list
-          [tracks]="nowPlayingTracks"
-          [currentTrackUri]="currentTrack?.uri ?? ''"
-          [showIndex]="true"
-          (trackClicked)="onQueueTrackClicked($event)">
-        </app-track-list>
+        @if (nowPlayingType === 'episode') {
+          <app-episode-list
+            [episodes]="nowPlayingEpisodes"
+            [currentEpisodeUri]="currentTrack?.uri ?? ''"
+            [showIndex]="true"
+            (episodeClicked)="onQueueEpisodeClicked($event)">
+          </app-episode-list>
+        } @else {
+          <app-track-list
+            [tracks]="nowPlayingTracks"
+            [currentTrackUri]="currentTrack?.uri ?? ''"
+            [showIndex]="true"
+            (trackClicked)="onQueueTrackClicked($event)">
+          </app-track-list>
+        }
       </div>
     } @else {
       <!-- Regular Player View -->

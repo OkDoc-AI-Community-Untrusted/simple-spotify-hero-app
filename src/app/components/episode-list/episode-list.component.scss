@@ -1,0 +1,42 @@
+.episode-list {
+  background: transparent;
+}
+
+.episode-item {
+  --background: transparent;
+  --color: #ffffff;
+  --padding-start: 8px;
+  --inner-padding-end: 8px;
+  --min-height: 56px;
+
+  ion-thumbnail {
+    --size: 48px;
+    --border-radius: 4px;
+    margin-inline-end: 12px;
+  }
+
+  h3 {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  p {
+    font-size: 0.8rem;
+  }
+
+  .episode-index {
+    font-size: 0.85rem;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+}
+
+.episode-item.now-playing {
+  --background: rgba(29, 185, 84, 0.1);
+
+  h3 {
+    color: #1DB954;
+  }
+}

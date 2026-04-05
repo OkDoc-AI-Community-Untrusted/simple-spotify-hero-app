@@ -30,12 +30,20 @@
       [playlist]="selectedPlaylist"
       (back)="onPlaylistBack()">
     </app-playlist-detail>
+  } @else if (selectedPodcast) {
+    <app-podcast-detail
+      [podcast]="selectedPodcast"
+      (back)="onPodcastBack()">
+    </app-podcast-detail>
   } @else if (activeTab === 'playlists') {
     <app-playlists
       (playlistSelected)="onPlaylistSelected($event)">
     </app-playlists>
   } @else {
-    <app-search (playlistSelected)="onPlaylistSelected($event)"></app-search>
+    <app-search
+      (playlistSelected)="onPlaylistSelected($event)"
+      (podcastSelected)="onPodcastSelected($event)">
+    </app-search>
   }
 </ion-content>
 

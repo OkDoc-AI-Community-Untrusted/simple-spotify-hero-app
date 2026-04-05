@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { IonButton, IonIcon, IonRange } from '@ionic/angular/standalone';
 import { Subscription } from 'rxjs';
 import { SpotifyPlayerService } from '../../services/spotify-player.service';
-import { SpotifyTrack } from '../../models/spotify.interface';
+import { SpotifyTrack, SpotifyEpisode } from '../../models/spotify.interface';
 import { TrackListComponent } from '../track-list/track-list.component';
+import { EpisodeListComponent } from '../episode-list/episode-list.component';
 
 @Component({
   selector: 'app-player',
-  imports: [IonButton, IonIcon, IonRange, CommonModule, TrackListComponent],
+  imports: [IonButton, IonIcon, IonRange, CommonModule, TrackListComponent, EpisodeListComponent],
   templateUrl: './player.component.html',
   styleUrls: ['./player.component.scss'],
 })
@@ -23,6 +24,8 @@ export class PlayerComponent implements OnInit, OnDestroy {
   isExpanded = false;
   showQueue = false;
   nowPlayingTracks: SpotifyTrack[] = [];
+  nowPlayingEpisodes: SpotifyEpisode[] = [];
+  nowPlayingType: 'track' | 'episode' = 'track';
   currentContextUri = '';
 
   private subscriptions: Subscription[] = [];
@@ -57,6 +60,12 @@ export class PlayerComponent implements OnInit, OnDestroy {
       }),
       this.playerService.nowPlayingList$.subscribe((tracks: SpotifyTrack[]) => {
         this.nowPlayingTracks = tracks;
+      }),
+      this.playerService.nowPlayingEpisodes$.subscribe((episodes: SpotifyEpisode[]) => {
+        this.nowPlayingEpisodes = episodes;
+      }),
+      this.playerService.nowPlayingType$.subscribe((type: 'track' | 'episode') => {
+        this.nowPlayingType = type;
       }),
       // Expand/collapse player from tool calls
       this.playerService.isPlayerExpanded$.subscribe((expanded: boolean) => {
@@ -100,7 +109,7 @@ export class PlayerComponent implements OnInit, OnDestroy {
   }
 
   get hasNowPlayingList(): boolean {
-    return this.nowPlayingTracks.length > 0;
+    return this.nowPlayingTracks.length > 0 || this.nowPlayingEpisodes.length > 0;
   }
 
   get toggleQueueIcon(): string {
@@ -130,6 +139,11 @@ export class PlayerComponent implements OnInit, OnDestroy {
     } else {
       this.playerService.playTrackUri(track.uri);
     }
+  }
+
+  onQueueEpisodeClicked(episode: SpotifyEpisode): void {
+    // currentContextUri holds the show URI (set when playContextUri was called)
+    this.playerService.playContextUri(this.currentContextUri, episode.uri);
   }
 
   togglePlay(): void {
