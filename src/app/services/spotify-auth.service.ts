@@ -47,6 +47,18 @@ export class SpotifyAuthService {
    * waiting for a page navigation.
    */
   async login(): Promise<boolean> {
+    const isIframe = window.self !== window.top;
+
+    // iOS Safari requires window.open() to be called synchronously within a
+    // user-gesture handler. If we await anything first (e.g. crypto.subtle.digest
+    // for the PKCE challenge), the gesture expires and the popup is silently
+    // blocked. So we open the popup NOW with a blank page, then navigate it
+    // to the Spotify auth URL once the challenge is ready.
+    let popup: Window | null = null;
+    if (isIframe) {
+      popup = window.open('about:blank', 'spotify_auth', 'width=500,height=700,resizable=yes');
+    }
+
     const codeVerifier: string = this.generateRandomString(64);
     localStorage.setItem(STORAGE_KEYS.CODE_VERIFIER, codeVerifier);
 
@@ -63,12 +75,13 @@ export class SpotifyAuthService {
 
     const url = `${SPOTIFY_AUTH_URL}?${params.toString()}`;
 
-    // When running inside an iframe (e.g. OkDoc plugin), Spotify's
-    // frame-ancestors CSP blocks direct iframe navigation to accounts.spotify.com.
-    // Open OAuth in a popup instead; the callback page will close it and we
-    // detect auth completion via the StorageEvent fired on this window.
-    if (window.self !== window.top) {
-      window.open(url, 'spotify_auth', 'width=500,height=700,resizable=yes');
+    if (isIframe) {
+      if (popup && !popup.closed) {
+        popup.location.href = url;
+      } else {
+        // Popup was blocked despite our best effort — try once more as fallback.
+        window.open(url, 'spotify_auth', 'width=500,height=700,resizable=yes');
+      }
       return true;
     }
 
