@@ -1,9 +1,20 @@
 import { Injectable, NgZone } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { SpotifyApiService } from '../apis/spotify.api.service';
 import { SpotifyAuthService } from './spotify-auth.service';
 import { SpotifyTrack, SpotifyEpisode } from '../models/spotify.interface';
 import { PLAYER_NAME, DEFAULT_VOLUME, POSITION_POLL_INTERVAL_MS } from '../models/constants';
+
+export type PlayerErrorKind =
+  | 'initialization_error'
+  | 'authentication_error'
+  | 'account_error'
+  | 'playback_error';
+
+export interface PlayerError {
+  kind: PlayerErrorKind;
+  message: string;
+}
 
 declare global {
   interface Window {
@@ -33,6 +44,9 @@ export class SpotifyPlayerService {
   readonly nowPlayingEpisodes$ = new BehaviorSubject<SpotifyEpisode[]>([]);
   readonly nowPlayingType$ = new BehaviorSubject<'track' | 'episode'>('track');
   readonly isPlayerExpanded$ = new BehaviorSubject<boolean>(false);
+
+  /** Emits Spotify Web Playback SDK error events for connection-drop notifications. */
+  readonly playerError$ = new Subject<PlayerError>();
 
   constructor(
     private spotifyApi: SpotifyApiService,
@@ -104,6 +118,32 @@ export class SpotifyPlayerService {
           return;
         }
         this.handleStateChange(state);
+      });
+    });
+
+    // Connection / playback failure listeners — surfaced via playerError$
+    // so the OkDoc layer can notify the host AI when the link drops.
+    this.player.addListener('initialization_error', ({ message }: { message: string }) => {
+      this.ngZone.run(() => {
+        this.playerError$.next({ kind: 'initialization_error', message });
+      });
+    });
+
+    this.player.addListener('authentication_error', ({ message }: { message: string }) => {
+      this.ngZone.run(() => {
+        this.playerError$.next({ kind: 'authentication_error', message });
+      });
+    });
+
+    this.player.addListener('account_error', ({ message }: { message: string }) => {
+      this.ngZone.run(() => {
+        this.playerError$.next({ kind: 'account_error', message });
+      });
+    });
+
+    this.player.addListener('playback_error', ({ message }: { message: string }) => {
+      this.ngZone.run(() => {
+        this.playerError$.next({ kind: 'playback_error', message });
       });
     });
 

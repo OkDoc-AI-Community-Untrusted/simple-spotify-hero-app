@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { SpotifyAuthService } from './spotify-auth.service';
-import { SpotifyPlayerService } from './spotify-player.service';
+import { Subscription, distinctUntilChanged, skip } from 'rxjs';
+import { SpotifyAuthService, AuthErrorReason } from './spotify-auth.service';
+import { SpotifyPlayerService, PlayerError } from './spotify-player.service';
 import { SpotifySearchService } from './spotify-search.service';
 import { SpotifyPlaylistService } from './spotify-playlist.service';
 import { SpotifyTrack } from '../models/spotify.interface';
@@ -12,6 +12,8 @@ const AUTH_REQUIRED_MESSAGE = 'Not authenticated. Please open the Spotify Hero A
 export class OkDocService {
   private initialized = false;
   private notifierSubscriptions: Subscription[] = [];
+  private onlineHandler: (() => void) | null = null;
+  private offlineHandler: (() => void) | null = null;
 
   constructor(
     private authService: SpotifyAuthService,
@@ -487,5 +489,72 @@ export class OkDocService {
         }
       }),
     );
+
+    this.setupConnectionNotifiers(OkDoc);
+  }
+
+  /**
+   * Surface connection-drop events to the host AI so it can react when the
+   * plugin loses Spotify, network, or auth connectivity. Inside an iframe
+   * we cannot show modals reliably — postMessage notifications are the
+   * canonical channel.
+   */
+  private setupConnectionNotifiers(OkDoc: any): void {
+    // Browser-level network drops.
+    this.offlineHandler = () => {
+      OkDoc.notify('Network connection lost — Spotify commands may fail until you are back online.');
+    };
+    this.onlineHandler = () => {
+      OkDoc.notify('Network connection restored.');
+    };
+    window.addEventListener('offline', this.offlineHandler);
+    window.addEventListener('online', this.onlineHandler);
+
+    // Spotify Web Playback SDK device drops. skip(1) ignores the initial
+    // `false` BehaviorSubject value so we only notify on real transitions.
+    this.notifierSubscriptions.push(
+      this.playerService.isReady$
+        .pipe(skip(1), distinctUntilChanged())
+        .subscribe((ready: boolean) => {
+          OkDoc.notify(
+            ready
+              ? 'Spotify playback device reconnected.'
+              : 'Spotify playback device disconnected — playback controls may be unavailable.',
+          );
+        }),
+    );
+
+    // Web Playback SDK error events (network / auth / account / playback).
+    this.notifierSubscriptions.push(
+      this.playerService.playerError$.subscribe((err: PlayerError) => {
+        OkDoc.notify(`Spotify player error (${err.kind}): ${err.message}`);
+      }),
+    );
+
+    // Auth refresh failures — distinguish transient network drops from a
+    // hard logout (refresh token rejected).
+    this.notifierSubscriptions.push(
+      this.authService.authError$.subscribe((reason: AuthErrorReason) => {
+        if (reason === 'network_error') {
+          OkDoc.notify('Could not refresh Spotify session — network unreachable. Will retry.');
+        } else {
+          OkDoc.notify('Spotify session expired and could not be refreshed. Please log in again.');
+        }
+      }),
+    );
+  }
+
+  /** Tear down listeners — call when the iframe is being unloaded. */
+  destroy(): void {
+    this.notifierSubscriptions.forEach((s: Subscription) => s.unsubscribe());
+    this.notifierSubscriptions = [];
+    if (this.offlineHandler) {
+      window.removeEventListener('offline', this.offlineHandler);
+      this.offlineHandler = null;
+    }
+    if (this.onlineHandler) {
+      window.removeEventListener('online', this.onlineHandler);
+      this.onlineHandler = null;
+    }
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
+import { BehaviorSubject, Subject } from 'rxjs';
 import {
   SPOTIFY_AUTH_URL,
   SPOTIFY_TOKEN_URL,
@@ -16,15 +17,34 @@ const STORAGE_KEYS = {
   CODE_VERIFIER: 'spotify_code_verifier',
 } as const;
 
+export type AuthErrorReason = 'refresh_failed' | 'network_error';
+
 @Injectable({ providedIn: 'root' })
 export class SpotifyAuthService {
   private refreshTimerId: ReturnType<typeof setTimeout> | null = null;
+
+  /**
+   * In-flight refresh promise — ensures concurrent callers (e.g. multiple
+   * parallel HTTP 401s) all share a single refresh request instead of racing.
+   */
+  private pendingRefresh: Promise<boolean> | null = null;
+
+  /** Reactive flag for components / guards. Updated whenever tokens change. */
+  readonly isAuthenticated$ = new BehaviorSubject<boolean>(this.isAuthenticated());
+
+  /** Emits when authentication is lost (refresh failure, network drop, etc). */
+  readonly authError$ = new Subject<AuthErrorReason>();
 
   constructor(
     private router: Router,
     private ngZone: NgZone,
   ) {
     this.scheduleTokenRefresh();
+
+    // Iframes can be throttled or fully suspended when the host tab is
+    // backgrounded — setTimeout may fire late or not at all. When the iframe
+    // becomes visible again, re-check expiry and refresh proactively.
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
   }
 
   isAuthenticated(): boolean {
@@ -36,15 +56,35 @@ export class SpotifyAuthService {
     return Date.now() < Number(expiry);
   }
 
+  hasRefreshToken(): boolean {
+    return !!localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
+  }
+
   getAccessToken(): string | null {
     return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
   }
 
   /**
+   * Resolves to true if the caller can safely make authenticated requests
+   * after this call. If the access token is fresh, returns immediately.
+   * If it is expired but a refresh token is stored, attempts a refresh.
+   * Used by route bootstrap and by the HTTP interceptor on 401.
+   */
+  async ensureFreshToken(): Promise<boolean> {
+    if (this.isAuthenticated()) {
+      return true;
+    }
+    if (!this.hasRefreshToken()) {
+      return false;
+    }
+    return this.refreshToken();
+  }
+
+  /**
    * Initiates the Spotify PKCE auth flow.
    * Returns true when a popup was opened (iframe context) so the caller
-   * can listen for auth completion via the storage event instead of
-   * waiting for a page navigation.
+   * can listen for auth completion via postMessage instead of waiting for
+   * a page navigation.
    */
   async login(): Promise<boolean> {
     const isIframe = window.self !== window.top;
@@ -112,24 +152,40 @@ export class SpotifyAuthService {
         return false;
       }
 
-      const data: SpotifyTokenResponse = await response.json() as SpotifyTokenResponse;
+      const data: SpotifyTokenResponse = (await response.json()) as SpotifyTokenResponse;
       this.storeTokens(data);
       localStorage.removeItem(STORAGE_KEYS.CODE_VERIFIER);
       this.scheduleTokenRefresh();
+      this.isAuthenticated$.next(true);
       return true;
     } catch {
       return false;
     }
   }
 
-  async refreshToken(): Promise<boolean> {
+  /**
+   * Refresh the access token. Concurrent callers share a single in-flight
+   * request (single-flight). Returns true on success.
+   */
+  refreshToken(): Promise<boolean> {
+    if (this.pendingRefresh) {
+      return this.pendingRefresh;
+    }
+    this.pendingRefresh = this.doRefresh().finally(() => {
+      this.pendingRefresh = null;
+    });
+    return this.pendingRefresh;
+  }
+
+  private async doRefresh(): Promise<boolean> {
     const refreshToken: string | null = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
     if (!refreshToken) {
       return false;
     }
 
+    let response: Response;
     try {
-      const response: Response = await fetch(SPOTIFY_TOKEN_URL, {
+      response = await fetch(SPOTIFY_TOKEN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
@@ -138,19 +194,24 @@ export class SpotifyAuthService {
           client_id: environment.spotifyClientId,
         }),
       });
-
-      if (!response.ok) {
-        this.logout();
-        return false;
-      }
-
-      const data: SpotifyTokenResponse = await response.json() as SpotifyTokenResponse;
-      this.storeTokens(data);
-      this.scheduleTokenRefresh();
-      return true;
     } catch {
+      // Network error — keep tokens (transient), notify listeners.
+      this.authError$.next('network_error');
       return false;
     }
+
+    if (!response.ok) {
+      // Refresh token rejected by Spotify — irrecoverable, force re-login.
+      this.authError$.next('refresh_failed');
+      this.logout();
+      return false;
+    }
+
+    const data: SpotifyTokenResponse = (await response.json()) as SpotifyTokenResponse;
+    this.storeTokens(data);
+    this.scheduleTokenRefresh();
+    this.isAuthenticated$.next(true);
+    return true;
   }
 
   logout(): void {
@@ -162,6 +223,7 @@ export class SpotifyAuthService {
       clearTimeout(this.refreshTimerId);
       this.refreshTimerId = null;
     }
+    this.isAuthenticated$.next(false);
     this.ngZone.run(() => {
       this.router.navigate(['/login']);
     });
@@ -179,6 +241,7 @@ export class SpotifyAuthService {
   private scheduleTokenRefresh(): void {
     if (this.refreshTimerId) {
       clearTimeout(this.refreshTimerId);
+      this.refreshTimerId = null;
     }
 
     const expiry: string | null = localStorage.getItem(STORAGE_KEYS.TOKEN_EXPIRY);
@@ -198,6 +261,16 @@ export class SpotifyAuthService {
       });
     }, msUntilRefresh);
   }
+
+  private onVisibilityChange = (): void => {
+    if (document.visibilityState !== 'visible') {
+      return;
+    }
+    // Iframe just became visible — make sure our token is still fresh.
+    if (this.hasRefreshToken() && !this.isAuthenticated()) {
+      this.refreshToken();
+    }
+  };
 
   private generateRandomString(length: number): string {
     const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

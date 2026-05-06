@@ -45,8 +45,10 @@ export class HomePage implements OnInit, OnDestroy {
     private router: Router,
   ) {}
 
-  ngOnInit(): void {
-    if (!this.authService.isAuthenticated()) {
+  async ngOnInit(): Promise<void> {
+    // Refresh access token if it expired while the iframe was closed before
+    // deciding whether the user is still authenticated.
+    if (!(await this.authService.ensureFreshToken())) {
       this.router.navigate(['/login']);
       return;
     }

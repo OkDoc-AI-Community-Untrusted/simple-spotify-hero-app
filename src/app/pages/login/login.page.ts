@@ -23,8 +23,10 @@ export class LoginPage implements OnInit, OnDestroy {
     private ngZone: NgZone,
   ) {}
 
-  ngOnInit(): void {
-    if (this.authService.isAuthenticated()) {
+  async ngOnInit(): Promise<void> {
+    // Try a silent refresh in case the access token expired but a refresh
+    // token is still on disk — keeps the user logged in across iframe reloads.
+    if (await this.authService.ensureFreshToken()) {
       this.router.navigate(['/home']);
     }
   }
